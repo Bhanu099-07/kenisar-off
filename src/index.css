@@ -1,0 +1,131 @@
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap');
+
+:root {
+  --color-page: #f7f2e8;
+  --color-surface: #faf6ee;
+  --color-surface-soft: #fffaf3;
+  --color-heading: #27231d;
+  --color-body: #5a544a;
+  --color-muted: #7b7367;
+  --color-accent: #c8aa63;
+  --color-accent-strong: #b58d49;
+  --color-white: #fff8eb;
+  --font-body: 'Manrope', 'Segoe UI', sans-serif;
+  --font-display: 'Cormorant Garamond', Georgia, serif;
+  --shadow-soft: 0 1rem 2.5rem rgba(27, 24, 18, 0.06);
+  color: var(--color-body);
+  background: var(--color-page);
+  font-family: var(--font-body);
+  font-size: 16px;
+  line-height: 1.65;
+  font-weight: 500;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  background: var(--color-page);
+}
+
+body,
+button,
+input,
+select,
+textarea {
+  font-family: var(--font-body);
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+a,
+button,
+input,
+select,
+textarea {
+  -webkit-tap-highlight-color: transparent;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+#root {
+  min-height: 100svh;
+}
+
+main,
+section,
+footer {
+  position: relative;
+}
+
+section[id],
+article[id] {
+  scroll-margin-top: 6rem;
+}
+
+h1,
+h2,
+h3 {
+  margin: 0;
+  color: var(--color-heading);
+  font-family: var(--font-display);
+  font-weight: 600;
+  line-height: 0.95;
+  letter-spacing: -0.03em;
+}
+
+h1 {
+  font-size: clamp(3.6rem, 8vw, 6.2rem);
+}
+
+h2 {
+  font-size: clamp(2.5rem, 5vw, 4rem);
+  margin-bottom: 1rem;
+}
+
+h3 {
+  font-size: clamp(1.45rem, 2vw, 1.95rem);
+  line-height: 1.1;
+}
+
+p {
+  margin: 0;
+  color: var(--color-body);
+}
+
+ul {
+  margin: 0;
+  padding: 0;
+}
+
+img,
+svg {
+  display: block;
+  max-width: 100%;
+}
+
+::selection {
+  background: rgba(200, 170, 99, 0.28);
+}
+
+@media (max-width: 720px) {
+  :root {
+    font-size: 15px;
+  }
+}
