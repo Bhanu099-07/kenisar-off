@@ -172,7 +172,7 @@ export function PartnerInterestForm() {
       </label>
 
       <button type="submit" className="button button--accent button--submit" disabled={status === 'loading'}>
-        <span>{status === 'loading' ? 'Submitting…' : 'Partner with Kenisar'}</span>
+        <span>{status === 'loading' ? 'Submitting...' : 'Partner with Kenisar'}</span>
         <ArrowIcon />
       </button>
     </form>

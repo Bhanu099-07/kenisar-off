@@ -19,7 +19,7 @@ export function FormStatus({ status, message, successTitle, successMessage }) {
   if (status === 'loading') {
     return (
       <div className="form-status form-status--loading" role="status" aria-live="polite">
-        <p>Submitting…</p>
+        <p>Submitting...</p>
       </div>
     )
   }

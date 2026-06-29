@@ -131,7 +131,7 @@ export function ContactForm() {
       </label>
 
       <button type="submit" className="button button--filled button--submit" disabled={status === 'loading'}>
-        <span>{status === 'loading' ? 'Submitting…' : 'Send message'}</span>
+        <span>{status === 'loading' ? 'Submitting...' : 'Send message'}</span>
         <ArrowIcon />
       </button>
     </form>

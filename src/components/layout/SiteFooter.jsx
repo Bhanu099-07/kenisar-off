@@ -43,8 +43,8 @@ export function SiteFooter({ currentPath, onNavigate }) {
       </div>
 
       <div className="footer-column">
-        <h3>Status</h3>
-        <p>Opportunities coming soon.</p>
+        <h3>Contact</h3>
+        <p>Contact details coming soon.</p>
         <p>We are building with students and organizations.</p>
       </div>
     </footer>

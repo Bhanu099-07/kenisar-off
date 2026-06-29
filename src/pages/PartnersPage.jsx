@@ -15,27 +15,43 @@ export function PartnersPage() {
       />
 
       <section className="section" data-reveal="section">
-        <SectionLabel>Why Partner With Kenisar</SectionLabel>
-        <div className="card-grid card-grid--four">
-          {partnerBenefits.map((benefit) => (
-            <ContentCard key={benefit.title} title={benefit.title} description={benefit.description} variant="light" />
-          ))}
-        </div>
-      </section>
-
-      <section className="section" data-reveal="section">
-        <SectionLabel>Opportunity Types</SectionLabel>
-        <div className="tag-list tag-list--dense">
-          {opportunityCategories.map((type) => (
-            <span key={type} className="tag-pill tag-pill--dark">
-              {type}
-            </span>
-          ))}
+        <div className="section-panel section-panel--dark">
+          <SectionLabel centered>Why Partner With Kenisar</SectionLabel>
+          <h2 className="section-heading section-heading--centered">
+            Offer early opportunities through a student-first platform.
+          </h2>
+          <p className="section-intro section-intro--centered">
+            Kenisar is designed for organizations that want to reach motivated students with roles, mentorship, and
+            hands-on experience that are genuinely beginner-friendly.
+          </p>
+          <div className="card-grid card-grid--four">
+            {partnerBenefits.map((benefit) => (
+              <ContentCard key={benefit.title} title={benefit.title} description={benefit.description} variant="light" />
+            ))}
+          </div>
         </div>
       </section>
 
       <section className="section section--narrow" data-reveal="section">
-        <PartnerInterestForm />
+        <div className="page-stack">
+          <div className="content-card content-card--light page-intro-card" data-reveal="card" data-tilt>
+            <SectionLabel>Opportunity Types</SectionLabel>
+            <h2>Share opportunities students can realistically begin with.</h2>
+            <p>
+              Kenisar is built for internships, volunteering, mentorship, workshops, part-time roles, and projects
+              that help students build experience before graduation.
+            </p>
+            <div className="tag-list tag-list--dense">
+              {opportunityCategories.map((type) => (
+                <span key={type} className="tag-pill tag-pill--dark">
+                  {type}
+                </span>
+              ))}
+            </div>
+          </div>
+
+          <PartnerInterestForm />
+        </div>
       </section>
     </div>
   )

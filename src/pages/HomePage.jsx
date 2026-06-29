@@ -63,19 +63,19 @@ const howSteps = [
 const orbitCards = [
   {
     title: 'Students',
-    description: 'Interests, strengths, and a first direction.',
+    description: 'Profile, interests, and a clearer first direction.',
     icon: 'person',
     className: 'orbit-card--students',
   },
   {
     title: 'Opportunities',
-    description: 'Mentorship, projects, volunteering, and internships.',
+    description: 'Mentorship, volunteering, projects, and internships.',
     icon: 'spark',
     className: 'orbit-card--opportunities',
   },
   {
     title: 'Growth',
-    description: 'Confidence, exposure, and real-world experience.',
+    description: 'Confidence, exposure, and early real-world experience.',
     icon: 'growth',
     className: 'orbit-card--growth',
   },

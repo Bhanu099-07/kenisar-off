@@ -15,7 +15,7 @@ export function AboutPage() {
       />
 
       <section className="section section--narrow" data-reveal="section">
-        <div className="content-stack">
+        <div className="content-stack section-panel section-panel--light">
           {aboutSections.map((section) => (
             <ContentCard key={section.title} title={section.title} description={section.description} variant="light" />
           ))}
@@ -23,12 +23,14 @@ export function AboutPage() {
       </section>
 
       <section className="section section--narrow" id="contact" data-reveal="section">
-        <SectionLabel>Contact</SectionLabel>
-        <h2 className="section-heading">Get in touch.</h2>
-        <p className="section-intro">
-          Have a question about Kenisar? Send us a message and we will get back to you.
-        </p>
-        <ContactForm />
+        <div className="section-panel section-panel--light">
+          <SectionLabel>Contact</SectionLabel>
+          <h2 className="section-heading">Get in touch.</h2>
+          <p className="section-intro">
+            Have a question about Kenisar? Send us a message and we will get back to you.
+          </p>
+          <ContactForm />
+        </div>
       </section>
     </div>
   )
