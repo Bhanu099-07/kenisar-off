@@ -63,7 +63,7 @@ const howSteps = [
 const orbitCards = [
   {
     title: 'Students',
-    description: 'Interests, ambition, and early momentum.',
+    description: 'Interests, strengths, and a first direction.',
     icon: 'person',
     className: 'orbit-card--students',
   },
@@ -75,22 +75,28 @@ const orbitCards = [
   },
   {
     title: 'Growth',
-    description: 'Confidence, direction, and real-world experience.',
+    description: 'Confidence, exposure, and real-world experience.',
     icon: 'growth',
     className: 'orbit-card--growth',
   },
 ]
 
 const particlePositions = [
-  { x: '8%', y: '16%', size: '0.42rem', delay: '0s', duration: '11s' },
-  { x: '18%', y: '68%', size: '0.32rem', delay: '1.2s', duration: '9.5s' },
-  { x: '30%', y: '10%', size: '0.22rem', delay: '0.4s', duration: '8.6s' },
-  { x: '44%', y: '58%', size: '0.55rem', delay: '2.1s', duration: '12s' },
-  { x: '55%', y: '18%', size: '0.36rem', delay: '0.7s', duration: '10.2s' },
-  { x: '64%', y: '44%', size: '0.44rem', delay: '1.8s', duration: '8.8s' },
-  { x: '76%', y: '12%', size: '0.28rem', delay: '2.4s', duration: '9.2s' },
-  { x: '86%', y: '64%', size: '0.5rem', delay: '1s', duration: '12.4s' },
-  { x: '92%', y: '26%', size: '0.3rem', delay: '2.8s', duration: '10.8s' },
+  { x: '7%', y: '18%', size: '0.38rem', delay: '0s', duration: '10s' },
+  { x: '18%', y: '68%', size: '0.28rem', delay: '1s', duration: '9s' },
+  { x: '28%', y: '14%', size: '0.24rem', delay: '0.4s', duration: '8s' },
+  { x: '43%', y: '58%', size: '0.52rem', delay: '2.1s', duration: '11.5s' },
+  { x: '54%', y: '24%', size: '0.3rem', delay: '0.7s', duration: '10.2s' },
+  { x: '66%', y: '48%', size: '0.4rem', delay: '1.8s', duration: '8.8s' },
+  { x: '80%', y: '16%', size: '0.26rem', delay: '2.4s', duration: '9.4s' },
+  { x: '88%', y: '62%', size: '0.46rem', delay: '1s', duration: '11.8s' },
+]
+
+const sceneNodes = [
+  { x: '18%', y: '64%', size: '0.8rem', className: 'hero-scene__node--soft' },
+  { x: '31%', y: '24%', size: '0.58rem', className: 'hero-scene__node--bright' },
+  { x: '72%', y: '23%', size: '0.74rem', className: 'hero-scene__node--soft' },
+  { x: '84%', y: '58%', size: '0.52rem', className: 'hero-scene__node--bright' },
 ]
 
 function HomeIcon({ icon }) {
@@ -170,13 +176,13 @@ function HomeIcon({ icon }) {
 
 function HomeHeroScene() {
   return (
-    <div className="hero-scene" aria-hidden="true" data-reveal="scene">
-      <div className="hero-scene__mesh hero-scene__mesh--olive" />
-      <div className="hero-scene__mesh hero-scene__mesh--plum" />
-      <div className="hero-scene__glow hero-scene__glow--primary" />
-      <div className="hero-scene__glow hero-scene__glow--secondary" />
+    <div className="hero-scene" aria-hidden="true" data-reveal="scene" style={{ '--reveal-delay': '140ms' }}>
+      <div className="hero-scene__mesh hero-scene__mesh--primary" data-parallax="slow" />
+      <div className="hero-scene__mesh hero-scene__mesh--secondary" data-parallax="medium" />
+      <div className="hero-scene__glow hero-scene__glow--primary" data-parallax="medium" />
+      <div className="hero-scene__glow hero-scene__glow--secondary" data-parallax="slow" />
 
-      {particlePositions.map((particle, index) => (
+      {particlePositions.map((particle) => (
         <span
           key={`${particle.x}-${particle.y}`}
           className="hero-scene__particle"
@@ -186,12 +192,19 @@ function HomeHeroScene() {
             '--particle-size': particle.size,
             '--particle-delay': particle.delay,
             '--particle-duration': particle.duration,
-            '--particle-index': index,
           }}
         />
       ))}
 
-      <div className="orbit-system">
+      {sceneNodes.map((node) => (
+        <span
+          key={`${node.x}-${node.y}`}
+          className={`hero-scene__node ${node.className}`}
+          style={{ '--node-x': node.x, '--node-y': node.y, '--node-size': node.size }}
+        />
+      ))}
+
+      <div className="orbit-system" data-parallax="deep">
         <div className="orbit-system__ring orbit-system__ring--outer" />
         <div className="orbit-system__ring orbit-system__ring--middle" />
         <div className="orbit-system__ring orbit-system__ring--inner" />
@@ -199,6 +212,8 @@ function HomeHeroScene() {
         <div className="orbit-system__beam orbit-system__beam--two" />
         <div className="orbit-system__trail orbit-system__trail--one" />
         <div className="orbit-system__trail orbit-system__trail--two" />
+        <div className="orbit-system__arc orbit-system__arc--left" />
+        <div className="orbit-system__arc orbit-system__arc--right" />
 
         <div className="orbit-system__core">
           <div className="orbit-system__core-ring" />
@@ -212,8 +227,14 @@ function HomeHeroScene() {
           </div>
         </div>
 
-        {orbitCards.map((card) => (
-          <article key={card.title} className={`orbit-card ${card.className}`} data-tilt>
+        {orbitCards.map((card, index) => (
+          <article
+            key={card.title}
+            className={`orbit-card ${card.className}`}
+            data-tilt
+            data-reveal="card"
+            style={{ '--reveal-delay': `${220 + index * 110}ms` }}
+          >
             <span className="orbit-card__icon">
               <HomeIcon icon={card.icon} />
             </span>
@@ -231,7 +252,7 @@ function HomeHeroScene() {
 function Hero({ onNavigate, currentPath }) {
   return (
     <section className="hero hero--cinematic" data-reveal="hero">
-      <div className="hero__copy hero__copy--cinematic">
+      <div className="hero__copy hero__copy--cinematic" style={{ '--reveal-delay': '0ms' }}>
         <h1>
           Real-world experience
           <span>before you graduate.</span>
@@ -254,7 +275,7 @@ function Hero({ onNavigate, currentPath }) {
           </Button>
         </div>
 
-        <div className="hero-proof" data-reveal="micro">
+        <div className="hero-proof" data-reveal="micro" style={{ '--reveal-delay': '180ms' }}>
           <span className="hero-proof__line" />
           <p>Student-first onboarding. Honest product signals. Built to grow into something real.</p>
         </div>
@@ -265,12 +286,13 @@ function Hero({ onNavigate, currentPath }) {
   )
 }
 
-function PremiumCard({ title, description, icon, note, stepNumber, variant = 'light' }) {
+function PremiumCard({ title, description, icon, note, stepNumber, variant = 'light', revealDelay = '0ms' }) {
   return (
     <article
       className={`content-card content-card--premium ${variant === 'light' ? 'content-card--light' : ''}`}
       data-tilt
       data-reveal="card"
+      style={{ '--reveal-delay': revealDelay }}
     >
       <div className="content-card__glow" />
       <div className="content-card__inner">
@@ -291,7 +313,7 @@ function PremiumCard({ title, description, icon, note, stepNumber, variant = 'li
 function PathwaySection() {
   return (
     <section className="section section--home-pathway" id="how-it-works">
-      <div className="home-stage home-stage--dark" data-reveal="section">
+      <div className="home-stage home-stage--dark" data-reveal="section" style={{ '--reveal-delay': '60ms' }}>
         <SectionLabel centered>How it works</SectionLabel>
         <h2 className="section-heading section-heading--centered">A clearer path into real-world experience.</h2>
         <p className="section-intro section-intro--centered">
@@ -302,7 +324,12 @@ function PathwaySection() {
         <div className="pathway-grid">
           {howSteps.map((step, index) => (
             <div key={step.title} className="pathway-grid__item">
-              <PremiumCard title={step.title} description={step.description} stepNumber={`0${index + 1}`} />
+              <PremiumCard
+                title={step.title}
+                description={step.description}
+                stepNumber={`0${index + 1}`}
+                revealDelay={`${140 + index * 110}ms`}
+              />
               {index < howSteps.length - 1 ? <span className="pathway-grid__connector" aria-hidden="true" /> : null}
             </div>
           ))}
@@ -315,7 +342,7 @@ function PathwaySection() {
 function HomeClosing({ onNavigate, currentPath }) {
   return (
     <section className="section section--home-closing">
-      <div className="closing-panel" data-reveal="section">
+      <div className="closing-panel" data-reveal="section" style={{ '--reveal-delay': '60ms' }}>
         <div className="closing-panel__copy">
           <SectionLabel>Start here</SectionLabel>
           <h2>Built for the students who want a real first step.</h2>
@@ -334,6 +361,7 @@ function HomeClosing({ onNavigate, currentPath }) {
         </div>
 
         <div className="closing-panel__portal" aria-hidden="true">
+          <div className="closing-panel__portal-orbit" />
           <div className="closing-panel__portal-frame">
             <span className="closing-panel__portal-light" />
           </div>
@@ -354,6 +382,12 @@ export function HomePage({ onNavigate, currentPath }) {
     const hero = page.querySelector('.hero--cinematic')
     const revealTargets = Array.from(page.querySelectorAll('[data-reveal]'))
     const tiltTargets = supportsPointerEffects ? Array.from(page.querySelectorAll('[data-tilt]')) : []
+
+    revealTargets.forEach((target, index) => {
+      if (!target.style.getPropertyValue('--reveal-delay')) {
+        target.style.setProperty('--reveal-delay', `${Math.min(index * 40, 240)}ms`)
+      }
+    })
 
     let observer
     if (!prefersReducedMotion) {
@@ -380,14 +414,28 @@ export function HomePage({ onNavigate, currentPath }) {
       const rect = hero.getBoundingClientRect()
       const x = ((event.clientX - rect.left) / rect.width) * 100
       const y = ((event.clientY - rect.top) / rect.height) * 100
+      const shiftX = (x - 50) / 50
+      const shiftY = (y - 50) / 50
+
       hero.style.setProperty('--spotlight-x', `${x}%`)
       hero.style.setProperty('--spotlight-y', `${y}%`)
+      page.style.setProperty('--pointer-shift-x', `${shiftX}`)
+      page.style.setProperty('--pointer-shift-y', `${shiftY}`)
     }
 
     function resetHeroMove() {
       if (!hero) return
-      hero.style.setProperty('--spotlight-x', '70%')
+      hero.style.setProperty('--spotlight-x', '68%')
       hero.style.setProperty('--spotlight-y', '28%')
+      page.style.setProperty('--pointer-shift-x', '0')
+      page.style.setProperty('--pointer-shift-y', '0')
+    }
+
+    function handleScroll() {
+      if (!hero) return
+      const rect = hero.getBoundingClientRect()
+      const progress = Math.min(Math.max(-rect.top / Math.max(rect.height, 1), 0), 1)
+      page.style.setProperty('--scroll-shift', `${progress}`)
     }
 
     if (supportsPointerEffects) {
@@ -395,13 +443,18 @@ export function HomePage({ onNavigate, currentPath }) {
       hero?.addEventListener('pointerleave', resetHeroMove)
     }
 
+    if (!prefersReducedMotion) {
+      window.addEventListener('scroll', handleScroll, { passive: true })
+      handleScroll()
+    }
+
     const tiltCleanups = tiltTargets.map((card) => {
       function handleMove(event) {
         const rect = card.getBoundingClientRect()
         const px = (event.clientX - rect.left) / rect.width
         const py = (event.clientY - rect.top) / rect.height
-        const rotateY = (px - 0.5) * 10
-        const rotateX = (0.5 - py) * 8
+        const rotateY = (px - 0.5) * 8
+        const rotateX = (0.5 - py) * 6
 
         card.style.setProperty('--tilt-rotate-x', `${rotateX}deg`)
         card.style.setProperty('--tilt-rotate-y', `${rotateY}deg`)
@@ -430,6 +483,7 @@ export function HomePage({ onNavigate, currentPath }) {
       page.classList.remove('page--home-motion-ready')
       hero?.removeEventListener('pointermove', handleHeroMove)
       hero?.removeEventListener('pointerleave', resetHeroMove)
+      window.removeEventListener('scroll', handleScroll)
       tiltCleanups.forEach((cleanup) => cleanup())
     }
   }, [])
@@ -439,7 +493,7 @@ export function HomePage({ onNavigate, currentPath }) {
       <Hero onNavigate={onNavigate} currentPath={currentPath} />
 
       <section className="section section--home-overview" id="what-kenisar-is">
-        <div className="home-stage home-stage--glass" data-reveal="section">
+        <div className="home-stage home-stage--glass" data-reveal="section" style={{ '--reveal-delay': '60ms' }}>
           <SectionLabel centered>What Kenisar is</SectionLabel>
           <h2 className="section-heading section-heading--centered">A cleaner way to begin before graduation.</h2>
           <p className="section-intro section-intro--centered">
@@ -448,13 +502,14 @@ export function HomePage({ onNavigate, currentPath }) {
           </p>
 
           <div className="card-grid card-grid--three card-grid--home-premium">
-            {whatCards.map((card) => (
+            {whatCards.map((card, index) => (
               <PremiumCard
                 key={card.title}
                 title={card.title}
                 description={card.description}
                 icon={card.icon}
                 variant="dark"
+                revealDelay={`${140 + index * 110}ms`}
               />
             ))}
           </div>
@@ -462,7 +517,7 @@ export function HomePage({ onNavigate, currentPath }) {
       </section>
 
       <section className="section section--home-audience" id="who-its-for">
-        <div className="home-stage home-stage--light" data-reveal="section">
+        <div className="home-stage home-stage--light" data-reveal="section" style={{ '--reveal-delay': '60ms' }}>
           <SectionLabel centered>Who it&apos;s for</SectionLabel>
           <h2 className="section-heading section-heading--centered">Designed for students at different starting points.</h2>
           <p className="section-intro section-intro--centered">
@@ -471,7 +526,7 @@ export function HomePage({ onNavigate, currentPath }) {
           </p>
 
           <div className="card-grid card-grid--three card-grid--home-premium">
-            {whoCards.map((card) => (
+            {whoCards.map((card, index) => (
               <PremiumCard
                 key={card.title}
                 title={card.title}
@@ -479,6 +534,7 @@ export function HomePage({ onNavigate, currentPath }) {
                 note={card.note}
                 icon={card.icon}
                 variant="light"
+                revealDelay={`${140 + index * 110}ms`}
               />
             ))}
           </div>
