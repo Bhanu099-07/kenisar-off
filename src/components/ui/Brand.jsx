@@ -1,6 +1,6 @@
 export function BrandMark() {
   return (
-    <svg viewBox="0 0 64 64" aria-hidden="true">
+    <svg viewBox="0 0 64 64" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
       <g fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round">
         <path strokeWidth="2.5" d="M13 18.2 32 9.8l19 8.4-19 8.5-19-8.5Z" />
         <path strokeWidth="2.5" d="M20.2 25.3c3.1 1.6 7.3 2.6 11.8 2.6 4.4 0 8.6-1 11.8-2.6" />

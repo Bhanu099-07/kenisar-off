@@ -9,11 +9,12 @@ export function OpportunitiesPage({ onNavigate, currentPath }) {
       <PageHero
         label="Opportunities"
         title="Opportunities coming soon."
-        description="Kenisar is currently onboarding student-friendly partners. Join the waitlist to be notified when opportunities are available."
+        description="Kenisar is currently onboarding student-friendly partners. Create your student profile to be notified when opportunities are available."
+        theme="opportunities"
       />
 
       <section className="section section--narrow">
-        <div className="empty-state-card">
+        <div className="empty-state-card" data-reveal="section" data-tilt>
           <div>
             <SectionLabel>Current Focus</SectionLabel>
             <h2>Student opportunities, built for real first experience.</h2>
@@ -33,7 +34,7 @@ export function OpportunitiesPage({ onNavigate, currentPath }) {
 
           <div className="button-row">
             <Button href="/apply" onNavigate={onNavigate} currentPath={currentPath}>
-              Join the waitlist
+              Create student profile
             </Button>
             <Button href="/partners" onNavigate={onNavigate} currentPath={currentPath} variant="accent">
               Partner with Kenisar

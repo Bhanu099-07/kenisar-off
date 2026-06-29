@@ -11,9 +11,10 @@ export function AboutPage() {
         label="About"
         title="What Kenisar is and why it exists."
         description="Kenisar is a student opportunity platform for high school, college, and university students who want clearer paths into real-world experience before graduation."
+        theme="about"
       />
 
-      <section className="section section--narrow">
+      <section className="section section--narrow" data-reveal="section">
         <div className="content-stack">
           {aboutSections.map((section) => (
             <ContentCard key={section.title} title={section.title} description={section.description} variant="light" />
@@ -21,7 +22,7 @@ export function AboutPage() {
         </div>
       </section>
 
-      <section className="section section--narrow" id="contact">
+      <section className="section section--narrow" id="contact" data-reveal="section">
         <SectionLabel>Contact</SectionLabel>
         <h2 className="section-heading">Get in touch.</h2>
         <p className="section-intro">

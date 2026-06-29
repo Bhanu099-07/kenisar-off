@@ -11,9 +11,10 @@ export function PartnersPage() {
         label="Partners"
         title="Partner with Kenisar."
         description="Kenisar is for organizations that want to offer internships, volunteer roles, mentorships, workshops, and project-based experiences that are genuinely beginner-friendly."
+        theme="partners"
       />
 
-      <section className="section">
+      <section className="section" data-reveal="section">
         <SectionLabel>Why Partner With Kenisar</SectionLabel>
         <div className="card-grid card-grid--four">
           {partnerBenefits.map((benefit) => (
@@ -22,7 +23,7 @@ export function PartnersPage() {
         </div>
       </section>
 
-      <section className="section">
+      <section className="section" data-reveal="section">
         <SectionLabel>Opportunity Types</SectionLabel>
         <div className="tag-list tag-list--dense">
           {opportunityCategories.map((type) => (
@@ -33,7 +34,7 @@ export function PartnersPage() {
         </div>
       </section>
 
-      <section className="section section--narrow">
+      <section className="section section--narrow" data-reveal="section">
         <PartnerInterestForm />
       </section>
     </div>

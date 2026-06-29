@@ -380,34 +380,7 @@ export function HomePage({ onNavigate, currentPath }) {
     const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
     const supportsPointerEffects = window.matchMedia('(pointer: fine)').matches && !prefersReducedMotion
     const hero = page.querySelector('.hero--cinematic')
-    const revealTargets = Array.from(page.querySelectorAll('[data-reveal]'))
-    const tiltTargets = supportsPointerEffects ? Array.from(page.querySelectorAll('[data-tilt]')) : []
-
-    revealTargets.forEach((target, index) => {
-      if (!target.style.getPropertyValue('--reveal-delay')) {
-        target.style.setProperty('--reveal-delay', `${Math.min(index * 40, 240)}ms`)
-      }
-    })
-
-    let observer
-    if (!prefersReducedMotion) {
-      page.classList.add('page--home-motion-ready')
-      observer = new IntersectionObserver(
-        (entries) => {
-          entries.forEach((entry) => {
-            if (entry.isIntersecting) {
-              entry.target.classList.add('is-visible')
-              observer?.unobserve(entry.target)
-            }
-          })
-        },
-        { threshold: 0.16, rootMargin: '0px 0px -8% 0px' },
-      )
-
-      revealTargets.forEach((target) => observer.observe(target))
-    } else {
-      revealTargets.forEach((target) => target.classList.add('is-visible'))
-    }
+    page.classList.add('page--home-motion-ready')
 
     function handleHeroMove(event) {
       if (!hero) return
@@ -448,43 +421,11 @@ export function HomePage({ onNavigate, currentPath }) {
       handleScroll()
     }
 
-    const tiltCleanups = tiltTargets.map((card) => {
-      function handleMove(event) {
-        const rect = card.getBoundingClientRect()
-        const px = (event.clientX - rect.left) / rect.width
-        const py = (event.clientY - rect.top) / rect.height
-        const rotateY = (px - 0.5) * 8
-        const rotateX = (0.5 - py) * 6
-
-        card.style.setProperty('--tilt-rotate-x', `${rotateX}deg`)
-        card.style.setProperty('--tilt-rotate-y', `${rotateY}deg`)
-        card.style.setProperty('--tilt-pointer-x', `${px * 100}%`)
-        card.style.setProperty('--tilt-pointer-y', `${py * 100}%`)
-      }
-
-      function handleLeave() {
-        card.style.setProperty('--tilt-rotate-x', '0deg')
-        card.style.setProperty('--tilt-rotate-y', '0deg')
-        card.style.setProperty('--tilt-pointer-x', '50%')
-        card.style.setProperty('--tilt-pointer-y', '50%')
-      }
-
-      card.addEventListener('pointermove', handleMove)
-      card.addEventListener('pointerleave', handleLeave)
-
-      return () => {
-        card.removeEventListener('pointermove', handleMove)
-        card.removeEventListener('pointerleave', handleLeave)
-      }
-    })
-
     return () => {
-      observer?.disconnect()
       page.classList.remove('page--home-motion-ready')
       hero?.removeEventListener('pointermove', handleHeroMove)
       hero?.removeEventListener('pointerleave', resetHeroMove)
       window.removeEventListener('scroll', handleScroll)
-      tiltCleanups.forEach((cleanup) => cleanup())
     }
   }, [])
 

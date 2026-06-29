@@ -70,7 +70,7 @@ export const whoItsForCards = [
 
 export const howItWorksSteps = [
   {
-    title: 'Join the waitlist',
+    title: 'Create your profile',
     description: 'Share your basics, school level, and the types of opportunities you want to explore.',
   },
   {

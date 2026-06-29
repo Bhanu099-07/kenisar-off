@@ -11,9 +11,10 @@ export function StudentsPage({ onNavigate, currentPath }) {
         label="Students"
         title="Built for students who want real experience."
         description="Kenisar is for high school, college, and university students who want a clearer path into internships, volunteering, mentorships, workshops, and early practical experience."
+        theme="students"
       />
 
-      <section className="section">
+      <section className="section" data-reveal="section">
         <SectionLabel>Why Join Kenisar</SectionLabel>
         <div className="card-grid card-grid--three">
           {studentBenefits.map((item) => (
@@ -22,7 +23,7 @@ export function StudentsPage({ onNavigate, currentPath }) {
         </div>
       </section>
 
-      <section className="section">
+      <section className="section" data-reveal="section">
         <SectionLabel centered>Who It Is For</SectionLabel>
         <div className="card-grid card-grid--three">
           {whoItsForCards.map((card) => (
@@ -31,7 +32,7 @@ export function StudentsPage({ onNavigate, currentPath }) {
         </div>
       </section>
 
-      <section className="section">
+      <section className="section" data-reveal="section">
         <SectionLabel centered>How It Works</SectionLabel>
         <div className="card-grid card-grid--three">
           {howItWorksSteps.map((step, index) => (
@@ -47,15 +48,15 @@ export function StudentsPage({ onNavigate, currentPath }) {
       </section>
 
       <section className="section section--cta">
-        <div className="cta-card">
+        <div className="cta-card" data-reveal="section" data-tilt>
           <div>
             <SectionLabel>Ready to start?</SectionLabel>
-            <h2>Join the waitlist to be notified when opportunities open.</h2>
+            <h2>Create your profile so Kenisar can notify you when opportunities open.</h2>
             <p>We are building with students and organizations. Opportunities are coming soon.</p>
           </div>
           <div className="button-row">
             <Button href="/apply" onNavigate={onNavigate} currentPath={currentPath}>
-              Join the waitlist
+              Create student profile
             </Button>
           </div>
         </div>

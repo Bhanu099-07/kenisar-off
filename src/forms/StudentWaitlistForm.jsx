@@ -101,7 +101,7 @@ export function StudentWaitlistForm() {
   }
 
   return (
-    <form className="form-card" onSubmit={handleSubmit} noValidate>
+    <form className="form-card" onSubmit={handleSubmit} noValidate data-reveal="section" data-tilt>
       <FormStatus status={status === 'error' ? 'error' : status === 'loading' ? 'loading' : 'idle'} message={errorMessage} />
 
       <div className="field-grid">

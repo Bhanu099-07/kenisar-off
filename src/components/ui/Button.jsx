@@ -6,7 +6,7 @@ export function Button({ href, children, onNavigate, currentPath, variant = 'fil
     return (
       <button
         type={type ?? 'button'}
-        className={`button button--${variant}`}
+        className={`button button--${variant} motion-magnetic`}
         onClick={onClick}
         disabled={disabled}
       >
@@ -21,7 +21,7 @@ export function Button({ href, children, onNavigate, currentPath, variant = 'fil
       href={href}
       onNavigate={onNavigate}
       currentPath={currentPath}
-      className={`button button--${variant}`}
+      className={`button button--${variant} motion-magnetic`}
       onClick={onClick}
     >
       <span>{children}</span>
