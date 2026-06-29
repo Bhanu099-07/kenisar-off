@@ -64,15 +64,13 @@ function Hero({ onNavigate, currentPath }) {
         <p className="hero__note">
           Opportunities are coming soon. We are building with students and organizations.
         </p>
-        <div className="hero__actions">
-          <div className="button-row button-row--hero">
-            <Button href="/apply" onNavigate={onNavigate} currentPath={currentPath}>
-              Join the student waitlist
-            </Button>
-            <Button href="/partners" onNavigate={onNavigate} currentPath={currentPath} variant="outline">
-              Partner with Kenisar
-            </Button>
-          </div>
+        <div className="button-row button-row--hero">
+          <Button href="/apply" onNavigate={onNavigate} currentPath={currentPath}>
+            Join the student waitlist
+          </Button>
+          <Button href="/partners" onNavigate={onNavigate} currentPath={currentPath} variant="outline">
+            Partner with Kenisar
+          </Button>
           <p className="hero__trust">Join early — no listings yet, no fake opportunities.</p>
         </div>
       </div>

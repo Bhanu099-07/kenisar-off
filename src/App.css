@@ -778,6 +778,10 @@
   gap: clamp(2.5rem, 6vw, 5rem);
   padding-bottom: 5rem;
   align-items: start;
+  background:
+    radial-gradient(circle at top left, rgba(134, 123, 24, 0.12), transparent 42%),
+    radial-gradient(circle at top right, rgba(140, 46, 62, 0.08), transparent 38%),
+    #1a1a1a;
 }
 
 .page--home .hero__eyebrow {
@@ -811,20 +815,19 @@
   line-height: 1.65;
 }
 
-.page--home .hero__actions {
-  margin-top: 2rem;
-}
-
 .page--home .button-row--hero {
-  margin-top: 0;
+  margin-top: 2rem;
   gap: 1rem;
+  align-items: flex-start;
 }
 
-.page--home .hero__copy .hero__trust {
-  margin: 0.9rem 0 0;
+.page--home .button-row--hero .hero__trust {
+  flex-basis: 100%;
+  width: 100%;
+  margin: 1rem 0 0;
   max-width: 28rem;
-  color: rgba(248, 246, 240, 0.78);
-  font-size: 0.84rem;
+  color: rgba(255, 255, 255, 0.72);
+  font-size: 0.9rem;
   font-weight: 500;
   line-height: 1.5;
 }
@@ -927,12 +930,8 @@
     grid-template-columns: 1fr;
   }
 
-  .page--home .hero__actions {
+  .page--home .button-row--hero {
     margin-top: 1.75rem;
-  }
-
-  .page--home .hero__copy .hero__trust {
-    font-size: 0.82rem;
   }
 
   .page--home .hero__copy h1 {
