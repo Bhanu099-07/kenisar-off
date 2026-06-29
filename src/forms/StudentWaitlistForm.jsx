@@ -94,8 +94,8 @@ export function StudentWaitlistForm() {
     return (
       <FormStatus
         status="success"
-        successTitle="You are on the waitlist"
-        successMessage="Thanks for joining. We will contact you as student-friendly opportunities become available."
+        successTitle="Student profile submitted"
+        successMessage="Thanks. Kenisar will contact you as student-friendly opportunities that match your interests become available."
       />
     )
   }
@@ -172,7 +172,7 @@ export function StudentWaitlistForm() {
       </label>
 
       <button type="submit" className="button button--filled button--submit" disabled={status === 'loading'}>
-        <span>{status === 'loading' ? 'Submitting…' : 'Join the waitlist'}</span>
+        <span>{status === 'loading' ? 'Submitting...' : 'Create student profile'}</span>
         <ArrowIcon />
       </button>
     </form>

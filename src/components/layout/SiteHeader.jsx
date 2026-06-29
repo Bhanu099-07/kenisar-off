@@ -43,7 +43,7 @@ export function SiteHeader({ currentPath, onNavigate }) {
 
       <div className="header-cta">
         <Button href="/apply" onNavigate={onNavigate} currentPath={currentPath} onClick={closeMenu}>
-          Join the waitlist
+          Create student profile
         </Button>
       </div>
     </header>

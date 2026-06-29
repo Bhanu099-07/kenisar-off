@@ -18,7 +18,7 @@ export const navigation = [
 export const titleMap = {
   home: 'Kenisar | Student Opportunities Platform',
   students: 'Students | Kenisar',
-  apply: 'Join the Waitlist | Kenisar',
+  apply: 'Create Student Profile | Kenisar',
   opportunities: 'Opportunities | Kenisar',
   partners: 'Partners | Kenisar',
   about: 'About | Kenisar',

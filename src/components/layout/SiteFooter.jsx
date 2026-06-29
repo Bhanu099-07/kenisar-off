@@ -28,7 +28,7 @@ export function SiteFooter({ currentPath, onNavigate }) {
           Students
         </AppLink>
         <AppLink href="/apply" onNavigate={onNavigate} currentPath={currentPath}>
-          Join the waitlist
+          Create student profile
         </AppLink>
         <AppLink href="/opportunities" onNavigate={onNavigate} currentPath={currentPath}>
           Opportunities

@@ -5,9 +5,9 @@ export function ApplyPage() {
   return (
     <div className="page">
       <PageHero
-        label="Join the Waitlist"
-        title="Be first to know when opportunities open."
-        description="Share a few details and we will contact you as student-friendly internships, volunteering, mentorships, and workshops become available."
+        label="Student Profile"
+        title="Create your student profile."
+        description="Share your interests, school stage, and the kinds of opportunities you want to explore. Kenisar will use this to contact you as relevant student-friendly opportunities open."
       />
 
       <section className="section section--narrow">
