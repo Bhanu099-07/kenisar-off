@@ -1,18 +1,25 @@
 @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap');
 
 :root {
-  --color-page: #f7f2e8;
-  --color-surface: #faf6ee;
-  --color-surface-soft: #fffaf3;
-  --color-heading: #27231d;
-  --color-body: #5a544a;
-  --color-muted: #7b7367;
-  --color-accent: #c8aa63;
-  --color-accent-strong: #b58d49;
-  --color-white: #fff8eb;
+  --color-page: #ede6d4;
+  --color-surface: #ede6d4;
+  --color-surface-soft: #f8f6f0;
+  --color-heading: #241f1a;
+  --color-body: #413d34;
+  --color-muted: #6d685b;
+  --color-accent: #867b18;
+  --color-accent-strong: #756b13;
+  --color-accent-contrast: #f8f6f0;
+  --color-plum: #8c2e3e;
+  --color-plum-strong: #752635;
+  --color-dark: #151515;
+  --color-dark-surface: #1d1d1d;
+  --color-text-primary: #f8f6f0;
+  --color-text-secondary: #bdb7a8;
   --font-body: 'Manrope', 'Segoe UI', sans-serif;
   --font-display: 'Cormorant Garamond', Georgia, serif;
-  --shadow-soft: 0 1rem 2.5rem rgba(27, 24, 18, 0.06);
+  --shadow-soft: 0 18px 34px rgba(18, 18, 18, 0.06);
+  --shadow-card: 0 10px 24px rgba(18, 18, 18, 0.05);
   color: var(--color-body);
   background: var(--color-page);
   font-family: var(--font-body);
@@ -86,7 +93,7 @@ h3 {
   color: var(--color-heading);
   font-family: var(--font-display);
   font-weight: 600;
-  line-height: 0.95;
+  line-height: 0.96;
   letter-spacing: -0.03em;
 }
 
@@ -121,7 +128,7 @@ svg {
 }
 
 ::selection {
-  background: rgba(200, 170, 99, 0.28);
+  background: rgba(140, 46, 62, 0.18);
 }
 
 @media (max-width: 720px) {
