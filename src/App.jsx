@@ -1,4 +1,5 @@
 import { startTransition, useEffect, useState } from 'react'
+import { flushSync } from 'react-dom'
 import { AppShell } from './components/layout/AppShell'
 import { routes, titleMap } from './data/content'
 import { AboutPage } from './pages/AboutPage'
@@ -25,6 +26,20 @@ function scrollToHash(hash) {
   })
 }
 
+function applyRouteTransition(update) {
+  const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+  const startViewTransition = document.startViewTransition?.bind(document)
+
+  if (!startViewTransition || prefersReducedMotion) {
+    startTransition(update)
+    return
+  }
+
+  startViewTransition(() => {
+    flushSync(update)
+  })
+}
+
 function PageContent({ routeKey, onNavigate, currentPath }) {
   switch (routeKey) {
     case 'students':
@@ -47,7 +62,7 @@ function App() {
 
   useEffect(() => {
     const handlePopState = () => {
-      startTransition(() => {
+      applyRouteTransition(() => {
         setCurrentPath(getPathname(window.location.pathname))
       })
     }
@@ -71,7 +86,7 @@ function App() {
     }
 
     window.history.pushState({}, '', `${pathname}${hash}`)
-    startTransition(() => {
+    applyRouteTransition(() => {
       setCurrentPath(pathname)
     })
 
@@ -86,7 +101,7 @@ function App() {
 
   return (
     <AppShell currentPath={currentPath} onNavigate={navigate}>
-      <PageContent routeKey={routeKey} onNavigate={navigate} currentPath={currentPath} />
+      <PageContent key={currentPath} routeKey={routeKey} onNavigate={navigate} currentPath={currentPath} />
     </AppShell>
   )
 }

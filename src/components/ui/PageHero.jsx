@@ -4,13 +4,18 @@ export function PageHero({ label, title, description, centered = true, theme = '
   return (
     <section className={`page-hero page-hero--${theme} ${centered ? 'page-hero--centered' : ''}`} data-reveal="hero">
       <div className="page-hero__visual" aria-hidden="true">
+        <span className="page-hero__mesh page-hero__mesh--one" />
+        <span className="page-hero__mesh page-hero__mesh--two" />
         <span className="page-hero__orb page-hero__orb--one" />
         <span className="page-hero__orb page-hero__orb--two" />
         <span className="page-hero__ring page-hero__ring--one" />
         <span className="page-hero__ring page-hero__ring--two" />
+        <span className="page-hero__ring page-hero__ring--three" />
         <span className="page-hero__node page-hero__node--one" />
         <span className="page-hero__node page-hero__node--two" />
+        <span className="page-hero__node page-hero__node--three" />
         <span className="page-hero__line page-hero__line--one" />
+        <span className="page-hero__line page-hero__line--two" />
       </div>
       <div className="page-hero__content">
         {label ? <SectionLabel>{label}</SectionLabel> : null}

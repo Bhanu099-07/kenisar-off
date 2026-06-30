@@ -1,5 +1,5 @@
 import { useEffect } from 'react'
-import { BrandMark } from '../components/ui/Brand'
+import { BrandLogoImage } from '../components/ui/Brand'
 import { Button } from '../components/ui/Button'
 import { SectionLabel } from '../components/ui/SectionLabel'
 
@@ -210,15 +210,19 @@ function HomeHeroScene() {
         <div className="orbit-system__ring orbit-system__ring--inner" />
         <div className="orbit-system__beam orbit-system__beam--one" />
         <div className="orbit-system__beam orbit-system__beam--two" />
+        <div className="orbit-system__network orbit-system__network--one" />
+        <div className="orbit-system__network orbit-system__network--two" />
         <div className="orbit-system__trail orbit-system__trail--one" />
         <div className="orbit-system__trail orbit-system__trail--two" />
+        <div className="orbit-system__pulse orbit-system__pulse--one" />
+        <div className="orbit-system__pulse orbit-system__pulse--two" />
         <div className="orbit-system__arc orbit-system__arc--left" />
         <div className="orbit-system__arc orbit-system__arc--right" />
 
         <div className="orbit-system__core">
           <div className="orbit-system__core-ring" />
           <div className="orbit-system__core-logo">
-            <BrandMark />
+            <BrandLogoImage alt="Kenisar" className="orbit-system__logo-asset" />
           </div>
           <div className="orbit-system__core-copy">
             <span>Students</span>

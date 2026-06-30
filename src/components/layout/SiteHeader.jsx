@@ -12,7 +12,7 @@ export function SiteHeader({ currentPath, onNavigate }) {
   }
 
   return (
-    <header className="site-header">
+    <header className={`site-header ${menuOpen ? 'site-header--menu-open' : ''}`}>
       <AppLink href="/" onNavigate={onNavigate} currentPath={currentPath} className="brand-link" onClick={closeMenu}>
         <Brand compact />
       </AppLink>

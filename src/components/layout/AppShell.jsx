@@ -55,6 +55,7 @@ export function AppShell({ currentPath, onNavigate, children }) {
     function handleScroll() {
       const scrollValue = Math.min(window.scrollY / Math.max(window.innerHeight * 1.5, 1), 1.2)
       shell.style.setProperty('--shell-scroll', `${scrollValue}`)
+      shell.classList.toggle('shell-is-scrolled', scrollValue > 0.05)
     }
 
     function attachTilt(target, strength = { x: 6, y: 8 }) {
@@ -124,6 +125,7 @@ export function AppShell({ currentPath, onNavigate, children }) {
     return () => {
       observer?.disconnect()
       shell.classList.remove('shell-motion-ready')
+      shell.classList.remove('shell-is-scrolled')
       window.removeEventListener('scroll', handleScroll)
       tiltCleanups.forEach((cleanup) => cleanup())
       magneticCleanups.forEach((cleanup) => cleanup())
@@ -133,6 +135,8 @@ export function AppShell({ currentPath, onNavigate, children }) {
   return (
     <div className={shellClassName}>
       <div className={`shell-atmosphere shell-atmosphere--${themeKey}`} aria-hidden="true">
+        <span className="shell-atmosphere__mesh shell-atmosphere__mesh--one" />
+        <span className="shell-atmosphere__mesh shell-atmosphere__mesh--two" />
         <span className="shell-atmosphere__orb shell-atmosphere__orb--one" />
         <span className="shell-atmosphere__orb shell-atmosphere__orb--two" />
         <span className="shell-atmosphere__orb shell-atmosphere__orb--three" />
@@ -140,6 +144,11 @@ export function AppShell({ currentPath, onNavigate, children }) {
         <span className="shell-atmosphere__ring shell-atmosphere__ring--two" />
         <span className="shell-atmosphere__line shell-atmosphere__line--one" />
         <span className="shell-atmosphere__line shell-atmosphere__line--two" />
+        <span className="shell-atmosphere__line shell-atmosphere__line--three" />
+        <span className="shell-atmosphere__particle shell-atmosphere__particle--one" />
+        <span className="shell-atmosphere__particle shell-atmosphere__particle--two" />
+        <span className="shell-atmosphere__particle shell-atmosphere__particle--three" />
+        <span className="shell-atmosphere__particle shell-atmosphere__particle--four" />
         <span className="shell-atmosphere__node shell-atmosphere__node--one" />
         <span className="shell-atmosphere__node shell-atmosphere__node--two" />
         <span className="shell-atmosphere__node shell-atmosphere__node--three" />
