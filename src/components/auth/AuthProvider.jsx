@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { AuthContext } from './AuthContext'
+import { upsertUserProfile } from '../../lib/kenisarApi'
 import { isSupabaseConfigured, supabase } from '../../lib/supabaseClient'
 
 function getRoleFromUser(user) {
@@ -31,6 +32,14 @@ export function AuthProvider({ children }) {
       }
 
       const fallbackRole = getRoleFromUser(nextUser)
+      if (fallbackRole) {
+        try {
+          await upsertUserProfile(nextUser.id, fallbackRole)
+        } catch {
+          // Keep auth usable even if background profile repair fails.
+        }
+      }
+
       const { data, error } = await supabase.from('user_profiles').select('*').eq('user_id', nextUser.id).maybeSingle()
 
       if (!isMounted) return
@@ -93,6 +102,14 @@ export function AuthProvider({ children }) {
     if (!isSupabaseConfigured || !session?.user) return
 
     const fallbackRole = getRoleFromUser(session.user)
+    if (fallbackRole) {
+      try {
+        await upsertUserProfile(session.user.id, fallbackRole)
+      } catch {
+        // A refresh should still complete with metadata fallback if needed.
+      }
+    }
+
     const { data } = await supabase.from('user_profiles').select('*').eq('user_id', session.user.id).maybeSingle()
 
     setProfile(

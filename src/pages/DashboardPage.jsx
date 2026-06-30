@@ -6,10 +6,10 @@ import { SectionLabel } from '../components/ui/SectionLabel'
 import { StatusBadge } from '../components/ui/StatusBadge'
 import {
   calculateProfileCompletion,
+  ensureOrganizationProfileExists,
+  ensureStudentProfileExists,
   getOrganizationOpportunities,
-  getOrganizationProfile,
   getStudentApplications,
-  getStudentProfile,
   getStudentSavedOpportunities,
 } from '../lib/kenisarApi'
 
@@ -91,7 +91,7 @@ export function DashboardPage({ currentPath, onNavigate, role }) {
       try {
         if (role === 'student') {
           const [profile, saved, applications] = await Promise.all([
-            getStudentProfile(user.id),
+            ensureStudentProfileExists(user),
             getStudentSavedOpportunities(user.id),
             getStudentApplications(user.id),
           ])
@@ -105,7 +105,7 @@ export function DashboardPage({ currentPath, onNavigate, role }) {
           })
         } else {
           const [profile, opportunities] = await Promise.all([
-            getOrganizationProfile(user.id),
+            ensureOrganizationProfileExists(user),
             getOrganizationOpportunities(user.id),
           ])
 

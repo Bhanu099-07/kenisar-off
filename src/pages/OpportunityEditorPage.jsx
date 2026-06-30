@@ -4,7 +4,7 @@ import { Button } from '../components/ui/Button'
 import { FormStatus } from '../components/ui/FormStatus'
 import { PageHero } from '../components/ui/PageHero'
 import { StatusBadge } from '../components/ui/StatusBadge'
-import { getOpportunityById, getOrganizationProfile, upsertOpportunity } from '../lib/kenisarApi'
+import { ensureOrganizationProfileExists, getOpportunityById, upsertOpportunity } from '../lib/kenisarApi'
 import { emailField, required } from '../forms/formValidation'
 
 function getOpportunitySearchId() {
@@ -45,7 +45,7 @@ export function OpportunityEditorPage({ currentPath, onNavigate }) {
       setMessage('')
 
       try {
-        const profile = await getOrganizationProfile(user.id)
+        const profile = await ensureOrganizationProfileExists(user)
         const existing = editingId ? await getOpportunityById(editingId) : null
 
         if (!isMounted) return

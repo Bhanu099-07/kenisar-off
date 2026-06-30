@@ -24,6 +24,120 @@ function handleError(error, fallbackMessage) {
   }
 }
 
+function buildStudentProfilePayload(userId, values = {}) {
+  return {
+    user_id: userId,
+    availability: values.availability?.trim() || null,
+    city: values.city?.trim() || null,
+    email: values.email?.trim() || null,
+    experience_goals: values.experience_goals?.trim() || null,
+    full_name: values.full_name?.trim() || null,
+    grade_or_year: values.grade_or_year?.trim() || null,
+    interests: normalizeList(values.interests),
+    resume_link: values.resume_link?.trim() || null,
+    school: values.school?.trim() || null,
+    skills: normalizeList(values.skills),
+  }
+}
+
+function buildOrganizationProfilePayload(userId, values = {}) {
+  return {
+    user_id: userId,
+    city: values.city?.trim() || null,
+    contact_name: values.contact_name?.trim() || null,
+    description: values.description?.trim() || null,
+    email: values.email?.trim() || null,
+    organization_name: values.organization_name?.trim() || null,
+    organization_type: values.organization_type?.trim() || null,
+    website: values.website?.trim() || null,
+  }
+}
+
+function getUserRole(user, fallbackRole) {
+  return fallbackRole ?? user?.user_metadata?.role ?? null
+}
+
+export async function upsertUserProfile(userId, role) {
+  ensureSupabase()
+
+  const { data, error } = await supabase
+    .from('user_profiles')
+    .upsert(
+      {
+        role,
+        user_id: userId,
+      },
+      { onConflict: 'user_id' },
+    )
+    .select('*')
+    .single()
+
+  handleError(error, 'Unable to save your account role.')
+  return data
+}
+
+export async function ensureStudentProfileExists(user) {
+  ensureSupabase()
+
+  await upsertUserProfile(user.id, getUserRole(user, 'student'))
+
+  const payload = buildStudentProfilePayload(user.id, {
+    email: user.email,
+    full_name: user.user_metadata?.full_name,
+  })
+
+  const { error } = await supabase.from('student_profiles').upsert(payload, {
+    ignoreDuplicates: true,
+    onConflict: 'user_id',
+  })
+
+  handleError(error, 'Unable to create your student profile automatically.')
+  return getStudentProfile(user.id)
+}
+
+export async function ensureOrganizationProfileExists(user) {
+  ensureSupabase()
+
+  await upsertUserProfile(user.id, getUserRole(user, 'organization'))
+
+  const payload = buildOrganizationProfilePayload(user.id, {
+    contact_name: user.user_metadata?.contact_name,
+    email: user.email,
+    organization_name: user.user_metadata?.organization_name,
+  })
+
+  const { error } = await supabase.from('organization_profiles').upsert(payload, {
+    ignoreDuplicates: true,
+    onConflict: 'user_id',
+  })
+
+  handleError(error, 'Unable to create your organization profile automatically.')
+  return getOrganizationProfile(user.id)
+}
+
+export async function provisionStudentAccountProfile(user, values = {}) {
+  ensureSupabase()
+
+  await upsertUserProfile(user.id, getUserRole(user, 'student'))
+  return upsertStudentProfile(user.id, {
+    email: user.email,
+    full_name: user.user_metadata?.full_name,
+    ...values,
+  })
+}
+
+export async function provisionOrganizationAccountProfile(user, values = {}) {
+  ensureSupabase()
+
+  await upsertUserProfile(user.id, getUserRole(user, 'organization'))
+  return upsertOrganizationProfile(user.id, {
+    contact_name: user.user_metadata?.contact_name,
+    email: user.email,
+    organization_name: user.user_metadata?.organization_name,
+    ...values,
+  })
+}
+
 export async function signUpStudent({ email, fullName, password }) {
   ensureSupabase()
 
@@ -41,10 +155,17 @@ export async function signUpStudent({ email, fullName, password }) {
   handleError(error, 'Unable to create your student account.')
 
   if (data.session?.user) {
-    await upsertStudentProfile(data.session.user.id, {
-      email,
-      full_name: fullName,
-    })
+    try {
+      await provisionStudentAccountProfile(data.session.user, {
+        email,
+        full_name: fullName,
+      })
+    } catch (profileError) {
+      throw new Error(
+        profileError.message ||
+          "Your student account was created, but Kenisar couldn't finish creating your student profile.",
+      )
+    }
   }
 
   return data
@@ -68,11 +189,18 @@ export async function signUpOrganization({ contactName, email, organizationName,
   handleError(error, 'Unable to create your organization account.')
 
   if (data.session?.user) {
-    await upsertOrganizationProfile(data.session.user.id, {
-      contact_name: contactName,
-      email,
-      organization_name: organizationName,
-    })
+    try {
+      await provisionOrganizationAccountProfile(data.session.user, {
+        contact_name: contactName,
+        email,
+        organization_name: organizationName,
+      })
+    } catch (profileError) {
+      throw new Error(
+        profileError.message ||
+          "Your organization account was created, but Kenisar couldn't finish creating your organization profile.",
+      )
+    }
   }
 
   return data
@@ -101,23 +229,9 @@ export async function getStudentProfile(userId) {
 export async function upsertStudentProfile(userId, values) {
   ensureSupabase()
 
-  const payload = {
-    user_id: userId,
-    availability: values.availability?.trim() || null,
-    city: values.city?.trim() || null,
-    email: values.email?.trim() || null,
-    experience_goals: values.experience_goals?.trim() || null,
-    full_name: values.full_name?.trim() || null,
-    grade_or_year: values.grade_or_year?.trim() || null,
-    interests: normalizeList(values.interests),
-    resume_link: values.resume_link?.trim() || null,
-    school: values.school?.trim() || null,
-    skills: normalizeList(values.skills),
-  }
-
   const { data, error } = await supabase
     .from('student_profiles')
-    .upsert(payload, { onConflict: 'user_id' })
+    .upsert(buildStudentProfilePayload(userId, values), { onConflict: 'user_id' })
     .select('*')
     .single()
 
@@ -136,20 +250,9 @@ export async function getOrganizationProfile(userId) {
 export async function upsertOrganizationProfile(userId, values) {
   ensureSupabase()
 
-  const payload = {
-    user_id: userId,
-    city: values.city?.trim() || null,
-    contact_name: values.contact_name?.trim() || null,
-    description: values.description?.trim() || null,
-    email: values.email?.trim() || null,
-    organization_name: values.organization_name?.trim() || null,
-    organization_type: values.organization_type?.trim() || null,
-    website: values.website?.trim() || null,
-  }
-
   const { data, error } = await supabase
     .from('organization_profiles')
-    .upsert(payload, { onConflict: 'user_id' })
+    .upsert(buildOrganizationProfilePayload(userId, values), { onConflict: 'user_id' })
     .select('*')
     .single()
 

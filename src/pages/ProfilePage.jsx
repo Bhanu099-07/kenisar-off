@@ -3,7 +3,12 @@ import { useAuth } from '../components/auth/useAuth'
 import { Button } from '../components/ui/Button'
 import { FormStatus } from '../components/ui/FormStatus'
 import { PageHero } from '../components/ui/PageHero'
-import { getOrganizationProfile, getStudentProfile, upsertOrganizationProfile, upsertStudentProfile } from '../lib/kenisarApi'
+import {
+  ensureOrganizationProfileExists,
+  ensureStudentProfileExists,
+  upsertOrganizationProfile,
+  upsertStudentProfile,
+} from '../lib/kenisarApi'
 import { emailField, required } from '../forms/formValidation'
 
 function listToText(value) {
@@ -45,7 +50,7 @@ export function ProfilePage({ currentPath, onNavigate, role }) {
 
       try {
         const profile =
-          role === 'student' ? await getStudentProfile(user.id) : await getOrganizationProfile(user.id)
+          role === 'student' ? await ensureStudentProfileExists(user) : await ensureOrganizationProfileExists(user)
 
         if (!isMounted) return
 
