@@ -94,14 +94,23 @@ export function PartnerInterestForm() {
     return (
       <FormStatus
         status="success"
-        successTitle="Partner interest received"
-        successMessage="Thanks for reaching out. We will contact you as we onboard student-friendly partners."
+        successTitle="Partnership inquiry received"
+        successMessage="Thanks for reaching out. Kenisar will review your inquiry and follow up if it fits a broader partnership conversation."
       />
     )
   }
 
   return (
     <form className="form-card form-card--light" onSubmit={handleSubmit} noValidate data-reveal="section" data-tilt>
+      <div className="page-stack">
+        <div>
+          <h2>Partnership inquiry</h2>
+          <p>
+            This form is for sponsorships, collaborations, schools, and special partnerships. Normal organizations
+            should create an account through the organization signup flow.
+          </p>
+        </div>
+
       <FormStatus status={status === 'error' ? 'error' : status === 'loading' ? 'loading' : 'idle'} message={errorMessage} />
 
       <div className="field-grid">
@@ -165,16 +174,17 @@ export function PartnerInterestForm() {
           rows="5"
           value={values.message}
           onChange={(event) => updateField('message', event.target.value)}
-          placeholder="Tell us about your organization and the types of opportunities you would like to offer students."
+          placeholder="Tell us about the partnership, collaboration, sponsorship, or special program you want to discuss."
           disabled={status === 'loading'}
         />
         {errors.message ? <small className="field-error">{errors.message}</small> : null}
       </label>
 
       <button type="submit" className="button button--accent button--submit" disabled={status === 'loading'}>
-        <span>{status === 'loading' ? 'Submitting...' : 'Partner with Kenisar'}</span>
+        <span>{status === 'loading' ? 'Submitting...' : 'Send partnership inquiry'}</span>
         <ArrowIcon />
       </button>
+      </div>
     </form>
   )
 }

@@ -275,7 +275,7 @@ function Hero({ onNavigate, currentPath }) {
             Create student profile
           </Button>
           <Button href="/auth/organization" onNavigate={onNavigate} currentPath={currentPath} variant="outline">
-            Partner with Kenisar
+            Create organization account
           </Button>
         </div>
 
@@ -359,7 +359,7 @@ function HomeClosing({ onNavigate, currentPath }) {
               Create student profile
             </Button>
             <Button href="/auth/organization" onNavigate={onNavigate} currentPath={currentPath} variant="secondary">
-              Talk to Kenisar
+              Create organization account
             </Button>
           </div>
         </div>

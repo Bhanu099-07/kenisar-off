@@ -39,7 +39,10 @@ export function SiteFooter({ currentPath, onNavigate }) {
       <div className="footer-column">
         <h3>For Partners</h3>
         <AppLink href="/auth/organization" onNavigate={onNavigate} currentPath={currentPath}>
-          Partner with Kenisar
+          Create organization account
+        </AppLink>
+        <AppLink href="/partners" onNavigate={onNavigate} currentPath={currentPath}>
+          Partnership inquiry
         </AppLink>
       </div>
 

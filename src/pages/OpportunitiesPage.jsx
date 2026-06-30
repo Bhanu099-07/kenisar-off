@@ -237,7 +237,7 @@ export function OpportunitiesPage({ onNavigate, currentPath }) {
                 {user && role === 'student' ? 'Student dashboard' : 'Create student profile'}
               </Button>
               <Button href="/auth/organization" onNavigate={onNavigate} currentPath={currentPath} variant="accent">
-                Organization signup
+                Create organization account
               </Button>
             </div>
           </aside>
@@ -277,7 +277,7 @@ export function OpportunitiesPage({ onNavigate, currentPath }) {
                   Create student profile
                 </Button>
                 <Button href="/auth/organization" onNavigate={onNavigate} currentPath={currentPath} variant="accent">
-                  Submit partner interest
+                  Create organization account
                 </Button>
               </div>
             </div>

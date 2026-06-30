@@ -35,7 +35,7 @@ export function SiteHeader({ currentPath, onNavigate }) {
       ? '/auth/organization'
       : '/auth/student'
 
-  const primaryLabel = user ? 'Dashboard' : isOrganizationPath ? 'Organization signup' : 'Create student profile'
+  const primaryLabel = user ? 'Dashboard' : isOrganizationPath ? 'Create organization account' : 'Create student profile'
 
   return (
     <header className={`site-header ${menuOpen ? 'site-header--menu-open' : ''}`}>

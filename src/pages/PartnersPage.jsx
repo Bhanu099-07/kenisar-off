@@ -10,8 +10,8 @@ export function PartnersPage({ onNavigate, currentPath }) {
     <div className="page">
       <PageHero
         label="Partners"
-        title="Partner with Kenisar."
-        description="Kenisar is for organizations that want to offer internships, volunteer roles, mentorships, workshops, and project-based experiences that are genuinely beginner-friendly."
+        title="Create an organization account and start posting through Kenisar."
+        description="Organizations can sign up, complete an organization profile, and create beginner-friendly listings that stay pending until Kenisar reviews them."
         theme="partners"
       />
 
@@ -22,8 +22,8 @@ export function PartnersPage({ onNavigate, currentPath }) {
             Offer early opportunities through a student-first platform.
           </h2>
           <p className="section-intro section-intro--centered">
-            Kenisar is designed for organizations that want to reach motivated students with roles, mentorship, and
-            hands-on experience that are genuinely beginner-friendly.
+            The normal organization path is simple: create an account, complete your organization profile, submit
+            listings, and manage their review status from your dashboard.
           </p>
           <div className="card-grid card-grid--four">
             {partnerBenefits.map((benefit) => (
@@ -36,15 +36,19 @@ export function PartnersPage({ onNavigate, currentPath }) {
       <section className="section section--narrow" data-reveal="section">
         <div className="page-stack">
           <div className="content-card content-card--light page-intro-card" data-reveal="card" data-tilt>
-            <SectionLabel>Opportunity Types</SectionLabel>
-            <h2>Share opportunities students can realistically begin with.</h2>
+            <SectionLabel>Organization Accounts</SectionLabel>
+            <h2>Use a real organization account for normal onboarding.</h2>
             <p>
-              Kenisar is built for internships, volunteering, mentorship, workshops, part-time roles, and projects
-              that help students build experience before graduation.
+              Standard organizations should create an account through Kenisar, complete an organization profile, and
+              submit opportunities for review. Listings can move from draft to pending, then approved or rejected after
+              review.
             </p>
             <div className="button-row">
               <Button href="/auth/organization" onNavigate={onNavigate} currentPath={currentPath}>
                 Create organization account
+              </Button>
+              <Button href="/dashboard/organization" onNavigate={onNavigate} currentPath={currentPath} variant="outline">
+                Organization dashboard
               </Button>
             </div>
             <div className="tag-list tag-list--dense">
@@ -54,6 +58,15 @@ export function PartnersPage({ onNavigate, currentPath }) {
                 </span>
               ))}
             </div>
+          </div>
+
+          <div className="content-card content-card--light page-intro-card" data-reveal="card" data-tilt>
+            <SectionLabel>Partnership Inquiry</SectionLabel>
+            <h2>Need something beyond a standard organization account?</h2>
+            <p>
+              Use this secondary inquiry form for sponsorships, school collaborations, community partnerships, or other
+              special relationship requests. It is not required for normal organization account creation.
+            </p>
           </div>
 
           <PartnerInterestForm />
