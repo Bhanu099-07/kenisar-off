@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useAuth } from '../auth/useAuth'
+import { isAdminUser } from '../../config/admin'
 import { navigation } from '../../data/content'
 import { AppLink } from '../ui/AppLink'
 import { Brand } from '../ui/Brand'
@@ -8,6 +9,7 @@ import { Button } from '../ui/Button'
 export function SiteHeader({ currentPath, onNavigate }) {
   const [menuOpen, setMenuOpen] = useState(false)
   const { role, signOut, user } = useAuth()
+  const canAccessAdmin = isAdminUser(user)
 
   function closeMenu() {
     setMenuOpen(false)
@@ -69,6 +71,11 @@ export function SiteHeader({ currentPath, onNavigate }) {
 
       <div className="header-cta">
         <div className="header-cta__row">
+          {canAccessAdmin ? (
+            <AppLink href="/admin" onNavigate={onNavigate} currentPath={currentPath} className="header-link-action" onClick={closeMenu}>
+              Admin
+            </AppLink>
+          ) : null}
           <Button href={primaryHref} onNavigate={onNavigate} currentPath={currentPath} onClick={closeMenu}>
             {primaryLabel}
           </Button>

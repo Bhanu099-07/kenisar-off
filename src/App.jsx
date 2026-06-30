@@ -3,7 +3,9 @@ import { flushSync } from 'react-dom'
 import { AuthProvider } from './components/auth/AuthProvider'
 import { useAuth } from './components/auth/useAuth'
 import { AppShell } from './components/layout/AppShell'
+import { isAdminUser } from './config/admin'
 import { routes, titleMap } from './data/content'
+import { AdminPage } from './pages/AdminPage'
 import { AboutPage } from './pages/AboutPage'
 import { ApplyPage } from './pages/ApplyPage'
 import { AuthPage } from './pages/AuthPage'
@@ -81,6 +83,51 @@ function ProtectedPage({ children, onNavigate, role }) {
   return children
 }
 
+function ProtectedAdminPage({ children, onNavigate, currentPath }) {
+  const { loading, role, user } = useAuth()
+
+  useEffect(() => {
+    if (loading) return
+
+    if (!user) {
+      onNavigate('/auth/organization')
+      return
+    }
+
+    if (!isAdminUser(user)) {
+      if (role === 'organization') {
+        onNavigate('/dashboard/organization')
+        return
+      }
+
+      if (role === 'student') {
+        onNavigate('/dashboard/student')
+        return
+      }
+
+      onNavigate('/')
+    }
+  }, [loading, onNavigate, role, user])
+
+  if (loading || !user || !isAdminUser(user)) {
+    return (
+      <div className="page">
+        <section className="section section--narrow">
+          <div className="empty-state-card">
+            <h2>Checking admin access.</h2>
+            <p>
+              Kenisar is verifying whether this account can access the opportunity approval dashboard for{' '}
+              {currentPath}.
+            </p>
+          </div>
+        </section>
+      </div>
+    )
+  }
+
+  return children
+}
+
 function PageContent({ routeKey, onNavigate, currentPath }) {
   switch (routeKey) {
     case 'authStudent':
@@ -104,6 +151,12 @@ function PageContent({ routeKey, onNavigate, currentPath }) {
         <ProtectedPage role="organization" onNavigate={onNavigate} currentPath={currentPath}>
           <OpportunityManagePage onNavigate={onNavigate} currentPath={currentPath} />
         </ProtectedPage>
+      )
+    case 'admin':
+      return (
+        <ProtectedAdminPage onNavigate={onNavigate} currentPath={currentPath}>
+          <AdminPage onNavigate={onNavigate} currentPath={currentPath} />
+        </ProtectedAdminPage>
       )
     case 'partners':
       return <PartnersPage onNavigate={onNavigate} currentPath={currentPath} />

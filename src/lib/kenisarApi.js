@@ -275,6 +275,49 @@ export async function getApprovedOpportunities() {
   return data ?? []
 }
 
+export async function getAdminReviewOpportunities() {
+  ensureSupabase()
+
+  const [opportunitiesResult, organizationProfilesResult] = await Promise.all([
+    supabase
+      .from('opportunities')
+      .select('id, title, description, opportunity_type, location, created_at, deadline, status, organization_id')
+      .in('status', ['pending', 'approved', 'rejected'])
+      .order('created_at', { ascending: false }),
+    supabase.from('organization_profiles').select('user_id, organization_name'),
+  ])
+
+  handleError(opportunitiesResult.error, 'Unable to load opportunities for admin review.')
+  handleError(organizationProfilesResult.error, 'Unable to load organization names for admin review.')
+
+  const organizationMap = new Map(
+    (organizationProfilesResult.data ?? []).map((item) => [item.user_id, item.organization_name || 'Organization']),
+  )
+
+  return (opportunitiesResult.data ?? []).map((item) => ({
+    ...item,
+    organization_name: organizationMap.get(item.organization_id) ?? 'Organization',
+  }))
+}
+
+export async function reviewOpportunityStatus(opportunityId, status) {
+  ensureSupabase()
+
+  if (!['approved', 'rejected'].includes(status)) {
+    throw new Error('Invalid review status.')
+  }
+
+  const { data, error } = await supabase
+    .from('opportunities')
+    .update({ status })
+    .eq('id', opportunityId)
+    .select('id, status')
+    .single()
+
+  handleError(error, `Unable to mark this opportunity as ${status}.`)
+  return data
+}
+
 export async function getStudentSavedOpportunities(userId) {
   ensureSupabase()
 
