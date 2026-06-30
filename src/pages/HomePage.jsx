@@ -222,7 +222,7 @@ function HomeHeroScene() {
         <div className="orbit-system__core">
           <div className="orbit-system__core-ring" />
           <div className="orbit-system__core-logo">
-            <BrandLogoImage alt="Kenisar" className="orbit-system__logo-asset" />
+            <BrandLogoImage alt="Kenisar panda icon" className="orbit-system__logo-asset" variant="icon" />
           </div>
           <div className="orbit-system__core-copy">
             <span>Students</span>

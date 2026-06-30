@@ -114,20 +114,15 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 0.34rem 0.4rem;
-  border-radius: 1.15rem;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0)),
-    rgba(12, 30, 58, 0.28);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.08),
-    0 14px 30px rgba(8, 21, 44, 0.16);
+  max-width: 100%;
+  padding: 0;
+  border: 0;
+  background: none;
+  box-shadow: none;
 }
 
 .brand-logo-asset {
   display: block;
-  width: clamp(8.9rem, 15vw, 11.2rem);
   height: auto;
   max-width: 100%;
   object-fit: contain;
@@ -135,8 +130,20 @@
   filter: none;
 }
 
-.brand--compact .brand-logo-asset {
-  width: clamp(8.5rem, 14vw, 10.5rem);
+.brand-logo-asset--navbar {
+  height: clamp(2.2rem, 3vw, 2.45rem);
+  width: auto;
+  max-width: min(48vw, 13.5rem);
+}
+
+.brand-logo-asset--footer {
+  width: min(100%, 16.5rem);
+  height: auto;
+}
+
+.brand-logo-asset--icon {
+  height: auto;
+  width: min(100%, 5.25rem);
 }
 
 .site-nav {
@@ -807,13 +814,8 @@
   margin-bottom: 1rem;
 }
 
-.footer-brand .brand-logo-frame {
-  padding: 0.42rem 0.5rem;
-  border-radius: 1.3rem;
-}
-
 .footer-brand .brand-logo-asset {
-  width: min(100%, 14rem);
+  max-width: 100%;
 }
 
 .footer-brand p,
@@ -3052,17 +3054,13 @@ main {
 }
 
 @media (max-width: 720px) {
-  .brand-logo-frame {
-    padding: 0.28rem 0.34rem;
-    border-radius: 0.95rem;
+  .brand-logo-asset--navbar {
+    height: clamp(1.95rem, 7.2vw, 2.15rem);
+    max-width: 11rem;
   }
 
-  .brand-logo-asset {
-    width: clamp(7.2rem, 34vw, 8.8rem);
-  }
-
-  .brand--compact .brand-logo-asset {
-    width: clamp(7rem, 33vw, 8.2rem);
+  .brand-logo-asset--footer {
+    width: min(100%, 13.4rem);
   }
 
   .page-hero {
