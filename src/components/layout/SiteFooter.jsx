@@ -1,5 +1,6 @@
 import { AppLink } from '../ui/AppLink'
 import { Brand } from '../ui/Brand'
+import { footerPolicyLinks } from '../../data/content'
 
 export function SiteFooter({ currentPath, onNavigate }) {
   return (
@@ -27,7 +28,7 @@ export function SiteFooter({ currentPath, onNavigate }) {
         <AppLink href="/students" onNavigate={onNavigate} currentPath={currentPath}>
           Students
         </AppLink>
-        <AppLink href="/apply" onNavigate={onNavigate} currentPath={currentPath}>
+        <AppLink href="/auth/student" onNavigate={onNavigate} currentPath={currentPath}>
           Create student profile
         </AppLink>
         <AppLink href="/opportunities" onNavigate={onNavigate} currentPath={currentPath}>
@@ -37,9 +38,18 @@ export function SiteFooter({ currentPath, onNavigate }) {
 
       <div className="footer-column">
         <h3>For Partners</h3>
-        <AppLink href="/partners" onNavigate={onNavigate} currentPath={currentPath}>
+        <AppLink href="/auth/organization" onNavigate={onNavigate} currentPath={currentPath}>
           Partner with Kenisar
         </AppLink>
+      </div>
+
+      <div className="footer-column">
+        <h3>Policies</h3>
+        {footerPolicyLinks.map((link) => (
+          <AppLink key={link.href} href={link.href} onNavigate={onNavigate} currentPath={currentPath}>
+            {link.label}
+          </AppLink>
+        ))}
       </div>
 
       <div className="footer-column">

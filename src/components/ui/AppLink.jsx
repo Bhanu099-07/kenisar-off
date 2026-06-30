@@ -1,5 +1,5 @@
 export function AppLink({ href, children, className, onNavigate, currentPath, onClick }) {
-  const path = href.split('#')[0]
+  const path = href.split('#')[0].split('?')[0]
   const isActive = path === currentPath
 
   function handleClick(event) {

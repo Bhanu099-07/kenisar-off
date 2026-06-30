@@ -55,7 +55,7 @@ export function StudentsPage({ onNavigate, currentPath }) {
             <p>We are building with students and organizations. Opportunities are coming soon.</p>
           </div>
           <div className="button-row">
-            <Button href="/apply" onNavigate={onNavigate} currentPath={currentPath}>
+            <Button href="/auth/student" onNavigate={onNavigate} currentPath={currentPath}>
               Create student profile
             </Button>
           </div>

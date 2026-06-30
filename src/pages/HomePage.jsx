@@ -271,10 +271,10 @@ function Hero({ onNavigate, currentPath }) {
         </p>
 
         <div className="button-row button-row--hero-cinematic">
-          <Button href="/apply" onNavigate={onNavigate} currentPath={currentPath}>
+          <Button href="/auth/student" onNavigate={onNavigate} currentPath={currentPath}>
             Create student profile
           </Button>
-          <Button href="/partners" onNavigate={onNavigate} currentPath={currentPath} variant="outline">
+          <Button href="/auth/organization" onNavigate={onNavigate} currentPath={currentPath} variant="outline">
             Partner with Kenisar
           </Button>
         </div>
@@ -355,10 +355,10 @@ function HomeClosing({ onNavigate, currentPath }) {
             graduation.
           </p>
           <div className="button-row button-row--closing">
-            <Button href="/apply" onNavigate={onNavigate} currentPath={currentPath}>
+            <Button href="/auth/student" onNavigate={onNavigate} currentPath={currentPath}>
               Create student profile
             </Button>
-            <Button href="/partners" onNavigate={onNavigate} currentPath={currentPath} variant="secondary">
+            <Button href="/auth/organization" onNavigate={onNavigate} currentPath={currentPath} variant="secondary">
               Talk to Kenisar
             </Button>
           </div>

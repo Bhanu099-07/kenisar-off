@@ -6,11 +6,19 @@ export function AppShell({ currentPath, onNavigate, children }) {
   const themeKey =
     currentPath === '/'
       ? 'home'
-      : currentPath === '/students' || currentPath === '/apply'
+      : currentPath === '/students' ||
+          currentPath === '/apply' ||
+          currentPath === '/auth/student' ||
+          currentPath === '/dashboard/student' ||
+          currentPath === '/profile/student'
         ? 'students'
-        : currentPath === '/opportunities'
+        : currentPath === '/opportunities' || currentPath === '/opportunities/manage'
           ? 'opportunities'
-          : currentPath === '/partners'
+          : currentPath === '/partners' ||
+              currentPath === '/auth/organization' ||
+              currentPath === '/dashboard/organization' ||
+              currentPath === '/profile/organization' ||
+              currentPath === '/opportunities/new'
             ? 'partners'
             : 'about'
 

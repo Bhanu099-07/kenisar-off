@@ -1,10 +1,11 @@
 import { opportunityCategories, partnerBenefits } from '../data/content'
+import { Button } from '../components/ui/Button'
 import { PartnerInterestForm } from '../forms/PartnerInterestForm'
 import { ContentCard } from '../components/ui/ContentCard'
 import { PageHero } from '../components/ui/PageHero'
 import { SectionLabel } from '../components/ui/SectionLabel'
 
-export function PartnersPage() {
+export function PartnersPage({ onNavigate, currentPath }) {
   return (
     <div className="page">
       <PageHero
@@ -41,6 +42,11 @@ export function PartnersPage() {
               Kenisar is built for internships, volunteering, mentorship, workshops, part-time roles, and projects
               that help students build experience before graduation.
             </p>
+            <div className="button-row">
+              <Button href="/auth/organization" onNavigate={onNavigate} currentPath={currentPath}>
+                Create organization account
+              </Button>
+            </div>
             <div className="tag-list tag-list--dense">
               {opportunityCategories.map((type) => (
                 <span key={type} className="tag-pill tag-pill--dark">

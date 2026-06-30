@@ -3,8 +3,21 @@ export const routes = {
   '/students': 'students',
   '/apply': 'apply',
   '/opportunities': 'opportunities',
+  '/opportunities/manage': 'opportunityManage',
+  '/opportunities/new': 'opportunityNew',
   '/partners': 'partners',
   '/about': 'about',
+  '/privacy': 'privacy',
+  '/terms': 'terms',
+  '/community-guidelines': 'communityGuidelines',
+  '/organization-posting-guidelines': 'organizationPostingGuidelines',
+  '/safety-trust': 'safetyTrust',
+  '/auth/organization': 'authOrganization',
+  '/auth/student': 'authStudent',
+  '/dashboard/organization': 'dashboardOrganization',
+  '/dashboard/student': 'dashboardStudent',
+  '/profile/organization': 'profileOrganization',
+  '/profile/student': 'profileStudent',
 }
 
 export const navigation = [
@@ -20,9 +33,30 @@ export const titleMap = {
   students: 'Students | Kenisar',
   apply: 'Create Student Profile | Kenisar',
   opportunities: 'Opportunities | Kenisar',
+  opportunityManage: 'Manage Listings | Kenisar',
+  opportunityNew: 'Create Opportunity Listing | Kenisar',
   partners: 'Partners | Kenisar',
   about: 'About | Kenisar',
+  privacy: 'Privacy Policy | Kenisar',
+  terms: 'Terms of Service | Kenisar',
+  communityGuidelines: 'Community Guidelines | Kenisar',
+  organizationPostingGuidelines: 'Organization Posting Guidelines | Kenisar',
+  safetyTrust: 'Safety & Trust | Kenisar',
+  authOrganization: 'Organization Account | Kenisar',
+  authStudent: 'Student Account | Kenisar',
+  dashboardOrganization: 'Organization Dashboard | Kenisar',
+  dashboardStudent: 'Student Dashboard | Kenisar',
+  profileOrganization: 'Organization Profile | Kenisar',
+  profileStudent: 'Student Profile | Kenisar',
 }
+
+export const footerPolicyLinks = [
+  { label: 'Privacy Policy', href: '/privacy' },
+  { label: 'Terms of Service', href: '/terms' },
+  { label: 'Community Guidelines', href: '/community-guidelines' },
+  { label: 'Organization Posting Guidelines', href: '/organization-posting-guidelines' },
+  { label: 'Safety & Trust', href: '/safety-trust' },
+]
 
 export const gradeLevels = ['High School', 'College', 'University']
 
