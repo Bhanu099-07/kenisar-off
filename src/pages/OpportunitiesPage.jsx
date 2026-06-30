@@ -66,7 +66,7 @@ function OpportunityCard({
       ) : (
         <div className="button-row">
           <Button
-            href={user ? getDashboardPathForRole(role) : '/auth/student'}
+            href={user ? getDashboardPathForRole(role) : '/auth?role=student'}
             onNavigate={onNavigate}
             currentPath={currentPath}
           >
@@ -140,7 +140,7 @@ export function OpportunitiesPage({ onNavigate, currentPath }) {
 
   async function handleToggleSave(opportunityId, isSaved) {
     if (!user) {
-      onNavigate('/auth/student')
+      onNavigate('/auth?role=student')
       return
     }
 
@@ -159,7 +159,7 @@ export function OpportunitiesPage({ onNavigate, currentPath }) {
 
   async function handleApply(item) {
     if (!user) {
-      onNavigate('/auth/student')
+      onNavigate('/auth?role=student')
       return
     }
 
@@ -231,13 +231,13 @@ export function OpportunitiesPage({ onNavigate, currentPath }) {
             <h2>{user ? 'Keep moving inside your account.' : 'Create an account to take action.'}</h2>
             <div className="button-row">
               <Button
-                href={user ? getDashboardPathForRole(role) : '/auth/student'}
+                href={user ? getDashboardPathForRole(role) : '/auth?role=student'}
                 onNavigate={onNavigate}
                 currentPath={currentPath}
               >
                 {user ? 'Dashboard' : 'Create student profile'}
               </Button>
-              <Button href="/auth/organization" onNavigate={onNavigate} currentPath={currentPath} variant="accent">
+              <Button href="/auth?role=organization" onNavigate={onNavigate} currentPath={currentPath} variant="accent">
                 Create organization account
               </Button>
             </div>
@@ -274,10 +274,10 @@ export function OpportunitiesPage({ onNavigate, currentPath }) {
               <h2>No opportunities are live yet.</h2>
               <p>{emptyDescription}</p>
               <div className="button-row">
-                <Button href="/auth/student" onNavigate={onNavigate} currentPath={currentPath}>
+                <Button href="/auth?role=student" onNavigate={onNavigate} currentPath={currentPath}>
                   Create student profile
                 </Button>
-                <Button href="/auth/organization" onNavigate={onNavigate} currentPath={currentPath} variant="accent">
+                <Button href="/auth?role=organization" onNavigate={onNavigate} currentPath={currentPath} variant="accent">
                   Create organization account
                 </Button>
               </div>

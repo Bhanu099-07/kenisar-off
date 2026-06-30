@@ -19,7 +19,7 @@ export function ApplyPage({ onNavigate, currentPath }) {
           <h2>Create a real student account instead.</h2>
           <p>Student accounts unlock editable profiles, saved opportunities, applications, and a real dashboard.</p>
           <div className="button-row">
-            <Button href="/auth/student" onNavigate={onNavigate} currentPath={currentPath}>
+            <Button href="/auth?role=student" onNavigate={onNavigate} currentPath={currentPath}>
               Create student account
             </Button>
           </div>

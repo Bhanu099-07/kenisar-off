@@ -1,5 +1,6 @@
 export const routes = {
   '/': 'home',
+  '/auth': 'auth',
   '/students': 'students',
   '/apply': 'apply',
   '/opportunities': 'opportunities',
@@ -26,12 +27,13 @@ export const navigation = [
   { label: 'Home', href: '/' },
   { label: 'Students', href: '/students' },
   { label: 'Opportunities', href: '/opportunities' },
-  { label: 'Partners', href: '/partners' },
+  { label: 'For Organizations', href: '/partners' },
   { label: 'About', href: '/about' },
 ]
 
 export const titleMap = {
   home: 'Kenisar | Student Opportunities Platform',
+  auth: 'Sign Up or Log In | Kenisar',
   students: 'Students | Kenisar',
   apply: 'Create Student Profile | Kenisar',
   opportunities: 'Opportunities | Kenisar',

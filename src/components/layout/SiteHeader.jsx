@@ -1,7 +1,5 @@
 import { useState } from 'react'
 import { useAuth } from '../auth/useAuth'
-import { getDashboardPathForRole, isAdminUser } from '../../config/admin'
-import { navigation } from '../../data/content'
 import { AppLink } from '../ui/AppLink'
 import { Brand } from '../ui/Brand'
 import { Button } from '../ui/Button'
@@ -9,7 +7,6 @@ import { Button } from '../ui/Button'
 export function SiteHeader({ currentPath, onNavigate }) {
   const [menuOpen, setMenuOpen] = useState(false)
   const { role, signOut, user } = useAuth()
-  const canAccessAdmin = role === 'admin' || isAdminUser(user)
 
   function closeMenu() {
     setMenuOpen(false)
@@ -21,21 +18,30 @@ export function SiteHeader({ currentPath, onNavigate }) {
     onNavigate('/')
   }
 
-  const isOrganizationPath =
-    currentPath === '/partners' ||
-    currentPath === '/auth/organization' ||
-    currentPath === '/dashboard/organization' ||
-    currentPath === '/profile/organization' ||
-    currentPath === '/opportunities/new' ||
-    currentPath === '/opportunities/manage'
-
-  const primaryHref = user
-    ? getDashboardPathForRole(role)
-    : isOrganizationPath
-      ? '/auth/organization'
-      : '/auth/student'
-
-  const primaryLabel = user ? 'Dashboard' : isOrganizationPath ? 'Create organization account' : 'Create student profile'
+  const navItems = user
+    ? role === 'admin'
+      ? [
+          { href: '/opportunities', label: 'Opportunities' },
+          { href: '/dashboard/admin', label: 'Admin Dashboard' },
+          { href: '/admin', label: 'Review Listings' },
+        ]
+      : role === 'organization'
+        ? [
+            { href: '/opportunities', label: 'Opportunities' },
+            { href: '/dashboard/organization', label: 'Dashboard' },
+            { href: '/opportunities/manage', label: 'Manage Opportunities' },
+            { href: '/opportunities/new', label: 'Create Opportunity' },
+            { href: '/profile/organization', label: 'Profile' },
+          ]
+        : [
+            { href: '/opportunities', label: 'Opportunities' },
+            { href: '/dashboard/student', label: 'Dashboard' },
+            { href: '/profile/student', label: 'Profile' },
+          ]
+    : [
+        { href: '/opportunities', label: 'Opportunities' },
+        { href: '/partners', label: 'For Organizations' },
+      ]
 
   return (
     <header className={`site-header ${menuOpen ? 'site-header--menu-open' : ''}`}>
@@ -54,7 +60,7 @@ export function SiteHeader({ currentPath, onNavigate }) {
       </button>
 
       <nav id="site-nav" className={`site-nav ${menuOpen ? 'site-nav--open' : ''}`} aria-label="Primary">
-        {navigation.map((item) => (
+        {navItems.map((item) => (
           <AppLink
             key={item.href}
             href={item.href}
@@ -69,23 +75,14 @@ export function SiteHeader({ currentPath, onNavigate }) {
 
       <div className="header-cta">
         <div className="header-cta__row">
-          {canAccessAdmin ? (
-            <AppLink
-              href="/dashboard/admin"
-              onNavigate={onNavigate}
-              currentPath={currentPath}
-              className="header-link-action"
-              onClick={closeMenu}
-            >
-              Admin
-            </AppLink>
+          {!user ? (
+            <Button href="/auth" onNavigate={onNavigate} currentPath={currentPath} onClick={closeMenu}>
+              Sign Up / Log In
+            </Button>
           ) : null}
-          <Button href={primaryHref} onNavigate={onNavigate} currentPath={currentPath} onClick={closeMenu}>
-            {primaryLabel}
-          </Button>
           {user ? (
             <button type="button" className="header-link-action" onClick={handleSignOut}>
-              Sign out
+              Log Out
             </button>
           ) : null}
         </div>

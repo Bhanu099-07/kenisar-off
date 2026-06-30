@@ -17,7 +17,7 @@ const authCopy = {
   organization: {
     dashboardPath: '/dashboard/organization',
     helper: 'Create an organization account to submit beginner-friendly opportunity listings and manage review status.',
-    label: 'For Organizations',
+    label: 'Organization Access',
     profilePath: '/profile/organization',
     signInTitle: 'Sign in as an organization',
     signUpTitle: 'Create your organization account',
@@ -26,12 +26,17 @@ const authCopy = {
   student: {
     dashboardPath: '/dashboard/student',
     helper: 'Create a student account to build your profile, save opportunities, and track your applications in one place.',
-    label: 'For Students',
+    label: 'Student Access',
     profilePath: '/profile/student',
     signInTitle: 'Sign in as a student',
     signUpTitle: 'Create your student account',
     title: 'Student accounts built for real early-career momentum.',
   },
+}
+
+function getRoleFromSearch() {
+  const role = new URLSearchParams(window.location.search).get('role')
+  return role === 'organization' ? 'organization' : 'student'
 }
 
 function AuthToggle({ isActive, label, onClick }) {
@@ -48,7 +53,8 @@ function AuthToggle({ isActive, label, onClick }) {
 }
 
 export function AuthPage({ currentPath, onNavigate, role }) {
-  const authConfig = authCopy[role]
+  const selectedRole = role ?? getRoleFromSearch()
+  const authConfig = authCopy[selectedRole]
   const { loading, role: currentRole, user } = useAuth()
   const [mode, setMode] = useState('signup')
   const [values, setValues] = useState({
@@ -66,9 +72,9 @@ export function AuthPage({ currentPath, onNavigate, role }) {
   useEffect(() => {
     if (loading || !user) return
 
-    const targetRole = currentRole ?? role
+    const targetRole = currentRole ?? selectedRole
     onNavigate(getDashboardPathForRole(targetRole))
-  }, [currentRole, loading, onNavigate, role, user])
+  }, [currentRole, loading, onNavigate, selectedRole, user])
 
   function updateField(name, value) {
     setValues((current) => ({ ...current, [name]: value }))
@@ -101,12 +107,12 @@ export function AuthPage({ currentPath, onNavigate, role }) {
         nextErrors.confirmPassword = 'Your passwords do not match.'
       }
 
-      if (role === 'student') {
+      if (selectedRole === 'student') {
         const nameError = required(values.fullName, 'Please enter your full name.')
         if (nameError) nextErrors.fullName = nameError
       }
 
-      if (role === 'organization') {
+      if (selectedRole === 'organization') {
         const orgError = required(values.organizationName, 'Please enter your organization name.')
         if (orgError) nextErrors.organizationName = orgError
 
@@ -137,12 +143,12 @@ export function AuthPage({ currentPath, onNavigate, role }) {
           password: values.password,
         })
 
-        onNavigate(getDashboardPathForRole(resolvedRole ?? role))
+        onNavigate(getDashboardPathForRole(resolvedRole ?? selectedRole))
         return
       }
 
       const result =
-        role === 'student'
+        selectedRole === 'student'
           ? await signUpStudent({
               email: values.email.trim(),
               fullName: values.fullName.trim(),
@@ -175,7 +181,7 @@ export function AuthPage({ currentPath, onNavigate, role }) {
           label={authConfig.label}
           title="Loading your account."
           description="Kenisar is getting your dashboard ready."
-          theme={role === 'student' ? 'students' : 'partners'}
+          theme={selectedRole === 'student' ? 'students' : 'partners'}
         />
       </div>
     )
@@ -184,18 +190,30 @@ export function AuthPage({ currentPath, onNavigate, role }) {
   return (
     <div className="page">
       <PageHero
-        label={authConfig.label}
-        title={authConfig.title}
-        description={authConfig.helper}
-        theme={role === 'student' ? 'students' : 'partners'}
+        label="Account Access"
+        title="Sign up or log in to Kenisar."
+        description="Choose the account type that matches how you want to use the platform, then continue with the right signup or login flow."
+        theme={selectedRole === 'student' ? 'students' : 'partners'}
       />
 
       <section className="section section--narrow" data-reveal="section">
         <div className="page-stack">
           <div className="content-card content-card--light" data-reveal="card" data-tilt>
-            <SectionLabel>Account Access</SectionLabel>
+            <SectionLabel>Choose Your Role</SectionLabel>
+            <div className="auth-toggle-row">
+              <AuthToggle
+                isActive={selectedRole === 'student'}
+                label="Student"
+                onClick={() => onNavigate('/auth?role=student')}
+              />
+              <AuthToggle
+                isActive={selectedRole === 'organization'}
+                label="Organization"
+                onClick={() => onNavigate('/auth?role=organization')}
+              />
+            </div>
             <h2>{mode === 'signup' ? authConfig.signUpTitle : authConfig.signInTitle}</h2>
-            <p>Use your account to move from interest forms into a real profile and dashboard workflow.</p>
+            <p>{authConfig.helper}</p>
           </div>
 
           <form className="form-card form-card--light" onSubmit={handleSubmit} noValidate data-reveal="card" data-tilt>
@@ -213,7 +231,7 @@ export function AuthPage({ currentPath, onNavigate, role }) {
             )}
 
             <div className="field-grid">
-              {mode === 'signup' && role === 'student' ? (
+              {mode === 'signup' && selectedRole === 'student' ? (
                 <label>
                   Full name
                   <input
@@ -227,7 +245,7 @@ export function AuthPage({ currentPath, onNavigate, role }) {
                 </label>
               ) : null}
 
-              {mode === 'signup' && role === 'organization' ? (
+              {mode === 'signup' && selectedRole === 'organization' ? (
                 <>
                   <label>
                     Organization name

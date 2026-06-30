@@ -28,7 +28,7 @@ export function SiteFooter({ currentPath, onNavigate }) {
         <AppLink href="/students" onNavigate={onNavigate} currentPath={currentPath}>
           Students
         </AppLink>
-        <AppLink href="/auth/student" onNavigate={onNavigate} currentPath={currentPath}>
+        <AppLink href="/auth?role=student" onNavigate={onNavigate} currentPath={currentPath}>
           Create student profile
         </AppLink>
         <AppLink href="/opportunities" onNavigate={onNavigate} currentPath={currentPath}>
@@ -37,11 +37,11 @@ export function SiteFooter({ currentPath, onNavigate }) {
       </div>
 
       <div className="footer-column">
-        <h3>For Partners</h3>
-        <AppLink href="/auth/organization" onNavigate={onNavigate} currentPath={currentPath}>
+        <h3>For Organizations</h3>
+        <AppLink href="/auth?role=organization" onNavigate={onNavigate} currentPath={currentPath}>
           Create organization account
         </AppLink>
-        <AppLink href="/partners" onNavigate={onNavigate} currentPath={currentPath}>
+        <AppLink href="/partners#partnership-inquiry" onNavigate={onNavigate} currentPath={currentPath}>
           Partnership inquiry
         </AppLink>
       </div>

@@ -1,4 +1,6 @@
 import { useEffect } from 'react'
+import { useAuth } from '../components/auth/useAuth'
+import { isAdminUser } from '../config/admin'
 import { BrandLogoImage } from '../components/ui/Brand'
 import { Button } from '../components/ui/Button'
 import { SectionLabel } from '../components/ui/SectionLabel'
@@ -253,35 +255,115 @@ function HomeHeroScene() {
   )
 }
 
-function Hero({ onNavigate, currentPath }) {
+function Hero({ onNavigate, currentPath, role, user }) {
+  const resolvedRole = role === 'admin' || isAdminUser(user) ? 'admin' : role
+  const isLoggedIn = Boolean(user)
+  const greetingName =
+    user?.user_metadata?.full_name ||
+    user?.user_metadata?.organization_name ||
+    user?.email?.split('@')[0] ||
+    'there'
+
+  const heroContent = !isLoggedIn
+    ? {
+        buttons: [
+          { href: '/auth', label: 'Get Started', variant: 'filled' },
+          { href: '/opportunities', label: 'Browse Opportunities', variant: 'outline' },
+        ],
+        note: 'Student-first onboarding. Honest product signals. Built to grow into something real.',
+        title: (
+          <>
+            Real-world experience
+            <span>before you graduate.</span>
+          </>
+        ),
+        description:
+          'Kenisar helps high school, college, and university students get closer to mentorship, projects, volunteering, internships, and partnerships that build real momentum.',
+        secondary:
+          'We are still early. That means no fake listings, no inflated claims, and no pretending the platform is further along than it is.',
+      }
+    : resolvedRole === 'organization'
+      ? {
+          buttons: [
+            { href: '/dashboard/organization', label: 'Organization Dashboard', variant: 'filled' },
+            { href: '/opportunities/new', label: 'Create Opportunity', variant: 'outline' },
+            { href: '/opportunities/manage', label: 'Manage Opportunities', variant: 'secondary' },
+          ],
+          note: 'Your organization account is ready to move from profile setup into real listing management.',
+          title: (
+            <>
+              Welcome back,
+              <span>{greetingName}.</span>
+            </>
+          ),
+          description:
+            'Use Kenisar to manage your organization profile, create student-friendly opportunities, and keep listings moving through review.',
+          secondary:
+            'Opportunity submissions stay pending until admin review, and approved listings become visible on the public opportunities page.',
+        }
+      : resolvedRole === 'admin'
+        ? {
+            buttons: [
+              { href: '/dashboard/admin', label: 'Open Admin Dashboard', variant: 'filled' },
+              { href: '/admin', label: 'Review Pending Listings', variant: 'outline' },
+            ],
+            note: 'Admin tools stay focused on review, approval, and keeping opportunity quality high.',
+            title: (
+              <>
+                Welcome back,
+                <span>{greetingName}.</span>
+              </>
+            ),
+            description:
+              'Review organization-submitted opportunities, move listings through approval, and keep Kenisar trustworthy for students and organizations.',
+            secondary:
+              'Admins can browse the public site too, but your primary workflow lives in the approval dashboard.',
+          }
+        : {
+            buttons: [
+              { href: '/dashboard/student', label: 'Go to Student Dashboard', variant: 'filled' },
+              { href: '/opportunities', label: 'Browse Opportunities', variant: 'outline' },
+              { href: '/profile/student', label: 'Complete/Edit Profile', variant: 'secondary' },
+            ],
+            note: 'Your student account is ready for real browsing, profile updates, and opportunity activity.',
+            title: (
+              <>
+                Welcome back,
+                <span>{greetingName}.</span>
+              </>
+            ),
+            description:
+              'Pick up where you left off by refining your profile, browsing approved opportunities, and tracking your early-career momentum.',
+            secondary:
+              'Kenisar is built to help students keep moving from interest into real-world experience before graduation.',
+          }
+
   return (
     <section className="hero hero--cinematic" data-reveal="hero">
       <div className="hero__copy hero__copy--cinematic" style={{ '--reveal-delay': '0ms' }}>
-        <h1>
-          Real-world experience
-          <span>before you graduate.</span>
-        </h1>
+        <h1>{heroContent.title}</h1>
         <p className="hero__lead hero__lead--cinematic">
-          Kenisar helps high school, college, and university students get closer to mentorship, projects,
-          volunteering, internships, and partnerships that build real momentum.
+          {heroContent.description}
         </p>
-        <p className="hero__note hero__note--cinematic">
-          We are still early. That means no fake listings, no inflated claims, and no pretending the platform is
-          further along than it is.
-        </p>
+        <p className="hero__note hero__note--cinematic">{heroContent.secondary}</p>
 
         <div className="button-row button-row--hero-cinematic">
-          <Button href="/auth/student" onNavigate={onNavigate} currentPath={currentPath}>
-            Create student profile
-          </Button>
-          <Button href="/auth/organization" onNavigate={onNavigate} currentPath={currentPath} variant="outline">
-            Create organization account
-          </Button>
+          {heroContent.buttons.map((button) => (
+            <Button
+              key={button.label}
+              href={button.href}
+              onNavigate={onNavigate}
+              currentPath={currentPath}
+              variant={button.variant}
+            >
+              {button.label}
+            </Button>
+          ))}
         </div>
 
         <div className="hero-proof" data-reveal="micro" style={{ '--reveal-delay': '180ms' }}>
           <span className="hero-proof__line" />
-          <p>Student-first onboarding. Honest product signals. Built to grow into something real.</p>
+          <p>{heroContent.note}</p>
         </div>
       </div>
 
@@ -343,24 +425,71 @@ function PathwaySection() {
   )
 }
 
-function HomeClosing({ onNavigate, currentPath }) {
+function HomeClosing({ onNavigate, currentPath, role, user }) {
+  const resolvedRole = role === 'admin' || isAdminUser(user) ? 'admin' : role
+  const isLoggedIn = Boolean(user)
+
+  const closingContent = !isLoggedIn
+    ? {
+        buttons: [
+          { href: '/auth', label: 'Get Started', variant: 'filled' },
+          { href: '/opportunities', label: 'Browse Opportunities', variant: 'secondary' },
+        ],
+        label: 'Start here',
+        text: "Kenisar is early, but the mission is clear: help students find more meaningful ways to begin before graduation.",
+        title: 'Built for the students who want a real first step.',
+      }
+    : resolvedRole === 'organization'
+      ? {
+          buttons: [
+            { href: '/dashboard/organization', label: 'Organization Dashboard', variant: 'filled' },
+            { href: '/opportunities/new', label: 'Create Opportunity', variant: 'secondary' },
+            { href: '/opportunities/manage', label: 'Manage Opportunities', variant: 'outline' },
+          ],
+          label: 'Welcome back',
+          text: 'Your organization account is ready for listing creation, profile updates, and opportunity management.',
+          title: 'Keep building student-friendly opportunities.',
+        }
+      : resolvedRole === 'admin'
+        ? {
+            buttons: [
+              { href: '/dashboard/admin', label: 'Open Admin Dashboard', variant: 'filled' },
+              { href: '/admin', label: 'Review Pending Listings', variant: 'secondary' },
+            ],
+            label: 'Welcome back',
+            text: 'Your admin tools are ready for opportunity review and approval.',
+            title: 'Keep the platform review flow moving.',
+          }
+        : {
+            buttons: [
+              { href: '/dashboard/student', label: 'Go to Student Dashboard', variant: 'filled' },
+              { href: '/opportunities', label: 'Browse Opportunities', variant: 'secondary' },
+              { href: '/profile/student', label: 'Complete/Edit Profile', variant: 'outline' },
+            ],
+            label: 'Welcome back',
+            text: 'Your student profile, dashboard, and opportunity browsing tools are ready to use.',
+            title: 'Keep building your early-career momentum.',
+          }
+
   return (
     <section className="section section--home-closing">
       <div className="closing-panel" data-reveal="section" style={{ '--reveal-delay': '60ms' }}>
         <div className="closing-panel__copy">
-          <SectionLabel>Start here</SectionLabel>
-          <h2>Built for the students who want a real first step.</h2>
-          <p>
-            Kenisar is early, but the mission is clear: help students find more meaningful ways to begin before
-            graduation.
-          </p>
+          <SectionLabel>{closingContent.label}</SectionLabel>
+          <h2>{closingContent.title}</h2>
+          <p>{closingContent.text}</p>
           <div className="button-row button-row--closing">
-            <Button href="/auth/student" onNavigate={onNavigate} currentPath={currentPath}>
-              Create student profile
-            </Button>
-            <Button href="/auth/organization" onNavigate={onNavigate} currentPath={currentPath} variant="secondary">
-              Create organization account
-            </Button>
+            {closingContent.buttons.map((button) => (
+              <Button
+                key={button.label}
+                href={button.href}
+                onNavigate={onNavigate}
+                currentPath={currentPath}
+                variant={button.variant}
+              >
+                {button.label}
+              </Button>
+            ))}
           </div>
         </div>
 
@@ -377,6 +506,8 @@ function HomeClosing({ onNavigate, currentPath }) {
 }
 
 export function HomePage({ onNavigate, currentPath }) {
+  const { role, user } = useAuth()
+
   useEffect(() => {
     const page = document.querySelector('.page--home')
     if (!page) return undefined
@@ -435,7 +566,7 @@ export function HomePage({ onNavigate, currentPath }) {
 
   return (
     <div className="page page--home">
-      <Hero onNavigate={onNavigate} currentPath={currentPath} />
+      <Hero onNavigate={onNavigate} currentPath={currentPath} role={role} user={user} />
 
       <section className="section section--home-overview" id="what-kenisar-is">
         <div className="home-stage home-stage--glass" data-reveal="section" style={{ '--reveal-delay': '60ms' }}>
@@ -488,7 +619,7 @@ export function HomePage({ onNavigate, currentPath }) {
 
       <PathwaySection />
 
-      <HomeClosing onNavigate={onNavigate} currentPath={currentPath} />
+      <HomeClosing onNavigate={onNavigate} currentPath={currentPath} role={role} user={user} />
     </div>
   )
 }

@@ -9,21 +9,21 @@ export function PartnersPage({ onNavigate, currentPath }) {
   return (
     <div className="page">
       <PageHero
-        label="Partners"
-        title="Create an organization account and start posting through Kenisar."
-        description="Organizations can sign up, complete an organization profile, and create beginner-friendly listings that stay pending until Kenisar reviews them."
+        label="For Organizations"
+        title="Help students build real early-career experience."
+        description="Kenisar helps organizations reach students for volunteering, internships, mentorship, projects, and other beginner-friendly opportunities."
         theme="partners"
       />
 
       <section className="section" data-reveal="section">
         <div className="section-panel section-panel--dark">
-          <SectionLabel centered>Why Partner With Kenisar</SectionLabel>
+          <SectionLabel centered>For Organizations</SectionLabel>
           <h2 className="section-heading section-heading--centered">
-            Offer early opportunities through a student-first platform.
+            Reach students through a clearer early-career platform.
           </h2>
           <p className="section-intro section-intro--centered">
-            The normal organization path is simple: create an account, complete your organization profile, submit
-            listings, and manage their review status from your dashboard.
+            Create an organization account, complete your profile, and share volunteering, internship, mentorship,
+            project-based, and other early-career opportunities with students through Kenisar.
           </p>
           <div className="card-grid card-grid--four">
             {partnerBenefits.map((benefit) => (
@@ -44,7 +44,7 @@ export function PartnersPage({ onNavigate, currentPath }) {
               review.
             </p>
             <div className="button-row">
-              <Button href="/auth/organization" onNavigate={onNavigate} currentPath={currentPath}>
+              <Button href="/auth?role=organization" onNavigate={onNavigate} currentPath={currentPath}>
                 Create organization account
               </Button>
               <Button href="/dashboard/organization" onNavigate={onNavigate} currentPath={currentPath} variant="outline">
@@ -60,7 +60,7 @@ export function PartnersPage({ onNavigate, currentPath }) {
             </div>
           </div>
 
-          <div className="content-card content-card--light page-intro-card" data-reveal="card" data-tilt>
+          <div className="content-card content-card--light page-intro-card" id="partnership-inquiry" data-reveal="card" data-tilt>
             <SectionLabel>Partnership Inquiry</SectionLabel>
             <h2>Need something beyond a standard organization account?</h2>
             <p>

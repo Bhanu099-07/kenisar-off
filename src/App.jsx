@@ -58,7 +58,7 @@ function ProtectedPage({ children, onNavigate, role }) {
     if (loading) return
 
     if (!user) {
-      onNavigate(role === 'organization' ? '/auth/organization' : '/auth/student')
+      onNavigate(role === 'organization' ? '/auth?role=organization' : '/auth?role=student')
       return
     }
 
@@ -83,6 +83,23 @@ function ProtectedPage({ children, onNavigate, role }) {
   return children
 }
 
+function LegacyAuthRedirect({ onNavigate, target }) {
+  useEffect(() => {
+    onNavigate(target)
+  }, [onNavigate, target])
+
+  return (
+    <div className="page">
+      <section className="section section--narrow">
+        <div className="empty-state-card">
+          <h2>Redirecting to Kenisar account access.</h2>
+          <p>Taking you to the unified sign up and log in flow.</p>
+        </div>
+      </section>
+    </div>
+  )
+}
+
 function ProtectedAdminPage({ children, onNavigate, currentPath }) {
   const { loading, role, user } = useAuth()
   const hasAdminAccess = role === 'admin' || isAdminUser(user)
@@ -91,7 +108,7 @@ function ProtectedAdminPage({ children, onNavigate, currentPath }) {
     if (loading) return
 
     if (!user) {
-      onNavigate('/auth/organization')
+      onNavigate('/auth')
       return
     }
 
@@ -121,10 +138,12 @@ function ProtectedAdminPage({ children, onNavigate, currentPath }) {
 
 function PageContent({ routeKey, onNavigate, currentPath }) {
   switch (routeKey) {
+    case 'auth':
+      return <AuthPage onNavigate={onNavigate} currentPath={currentPath} />
     case 'authStudent':
-      return <AuthPage role="student" onNavigate={onNavigate} currentPath={currentPath} />
+      return <LegacyAuthRedirect onNavigate={onNavigate} target="/auth?role=student" />
     case 'authOrganization':
-      return <AuthPage role="organization" onNavigate={onNavigate} currentPath={currentPath} />
+      return <LegacyAuthRedirect onNavigate={onNavigate} target="/auth?role=organization" />
     case 'students':
       return <StudentsPage onNavigate={onNavigate} currentPath={currentPath} />
     case 'apply':
