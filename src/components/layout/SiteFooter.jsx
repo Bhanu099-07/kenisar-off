@@ -1,8 +1,60 @@
+import { useAuth } from '../auth/useAuth'
 import { AppLink } from '../ui/AppLink'
 import { Brand } from '../ui/Brand'
 import { footerPolicyLinks } from '../../data/content'
 
 export function SiteFooter({ currentPath, onNavigate }) {
+  const { role, user } = useAuth()
+
+  const footerSections = !user
+    ? [
+        {
+          heading: 'Explore',
+          links: [
+            { href: '/about', label: 'About Kenisar' },
+            { href: '/students', label: 'Students' },
+            { href: '/partners', label: 'For Organizations' },
+            { href: '/opportunities', label: 'Opportunities' },
+          ],
+        },
+      ]
+    : role === 'admin'
+      ? [
+          {
+            heading: 'Admin',
+            links: [
+              { href: '/dashboard/admin', label: 'Admin Dashboard' },
+              { href: '/admin', label: 'Review Listings' },
+              { href: '/opportunities', label: 'Opportunities' },
+            ],
+          },
+        ]
+      : role === 'organization'
+        ? [
+            {
+              heading: 'Organization',
+              links: [
+                { href: '/dashboard/organization', label: 'Dashboard' },
+                { href: '/profile/organization', label: 'Organization Profile' },
+                { href: '/opportunities/new', label: 'Create Opportunity' },
+                { href: '/opportunities/manage', label: 'Manage Opportunities' },
+                { href: '/opportunities/manage', label: 'Applicants' },
+              ],
+            },
+          ]
+        : [
+            {
+              heading: 'Student',
+              links: [
+                { href: '/dashboard/student', label: 'Dashboard' },
+                { href: '/profile/student', label: 'Profile' },
+                { href: '/opportunities', label: 'Opportunities' },
+                { href: '/saved', label: 'Saved Opportunities' },
+                { href: '/applications', label: 'Applications' },
+              ],
+            },
+          ]
+
   return (
     <footer className="site-footer">
       <div className="footer-brand">
@@ -13,38 +65,16 @@ export function SiteFooter({ currentPath, onNavigate }) {
         </p>
       </div>
 
-      <div className="footer-column">
-        <h3>About</h3>
-        <AppLink href="/about" onNavigate={onNavigate} currentPath={currentPath}>
-          About Kenisar
-        </AppLink>
-        <AppLink href="/about#contact" onNavigate={onNavigate} currentPath={currentPath}>
-          Contact
-        </AppLink>
-      </div>
-
-      <div className="footer-column">
-        <h3>For Students</h3>
-        <AppLink href="/students" onNavigate={onNavigate} currentPath={currentPath}>
-          Students
-        </AppLink>
-        <AppLink href="/auth?role=student" onNavigate={onNavigate} currentPath={currentPath}>
-          Create student profile
-        </AppLink>
-        <AppLink href="/opportunities" onNavigate={onNavigate} currentPath={currentPath}>
-          Opportunities
-        </AppLink>
-      </div>
-
-      <div className="footer-column">
-        <h3>For Organizations</h3>
-        <AppLink href="/auth?role=organization" onNavigate={onNavigate} currentPath={currentPath}>
-          Create organization account
-        </AppLink>
-        <AppLink href="/partners#partnership-inquiry" onNavigate={onNavigate} currentPath={currentPath}>
-          Partnership inquiry
-        </AppLink>
-      </div>
+      {footerSections.map((section) => (
+        <div key={section.heading} className="footer-column">
+          <h3>{section.heading}</h3>
+          {section.links.map((link) => (
+            <AppLink key={link.href + link.label} href={link.href} onNavigate={onNavigate} currentPath={currentPath}>
+              {link.label}
+            </AppLink>
+          ))}
+        </div>
+      ))}
 
       <div className="footer-column">
         <h3>Policies</h3>
@@ -57,6 +87,9 @@ export function SiteFooter({ currentPath, onNavigate }) {
 
       <div className="footer-column">
         <h3>Contact</h3>
+        <AppLink href="/about#contact" onNavigate={onNavigate} currentPath={currentPath}>
+          Contact
+        </AppLink>
         <p>Contact details coming soon.</p>
         <p>We are building with students and organizations.</p>
       </div>

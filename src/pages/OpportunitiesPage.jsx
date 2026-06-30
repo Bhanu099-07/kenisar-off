@@ -1,10 +1,11 @@
 import { useEffect, useMemo, useState } from 'react'
+import { OpportunitySummaryCard } from '../components/opportunities/OpportunitySummaryCard'
 import { useAuth } from '../components/auth/useAuth'
-import { getDashboardPathForRole } from '../config/admin'
 import { Button } from '../components/ui/Button'
 import { PageHero } from '../components/ui/PageHero'
 import { SectionLabel } from '../components/ui/SectionLabel'
-import { StatusBadge } from '../components/ui/StatusBadge'
+import { getDashboardPathForRole } from '../config/admin'
+import { formatDateLabel } from '../lib/opportunityPresentation'
 import {
   getApprovedOpportunities,
   getStudentApplications,
@@ -14,68 +15,69 @@ import {
   saveOpportunity,
 } from '../lib/kenisarApi'
 
-function OpportunityCard({
-  currentPath,
-  isApplied,
-  isSaved,
-  item,
-  onApply,
-  onNavigate,
-  onToggleSave,
-  role,
-  user,
-}) {
-  const organizationName = item.organization_profiles?.organization_name ?? 'Kenisar partner'
+const filters = [
+  'Volunteer',
+  'Internship',
+  'Mentorship',
+  'Project',
+  'Remote',
+  'In Person',
+  'Hybrid',
+  'High School',
+  'College',
+  'University',
+]
 
-  return (
-    <article className="content-card content-card--light opportunity-card" data-reveal="card" data-tilt>
-      <div className="dashboard-record__header">
-        <div>
-          <h2>{item.title}</h2>
-          <p>
-            {organizationName} · {item.location}
-          </p>
-        </div>
-        <StatusBadge status={item.status} />
-      </div>
+function matchesFilter(item, filterLabel) {
+  const typeText = item.opportunity_type?.toLowerCase() ?? ''
+  const modeText = item.remote_or_in_person?.toLowerCase() ?? ''
+  const eligibilityText = item.eligibility?.toLowerCase() ?? ''
 
-      <p>{item.description}</p>
+  switch (filterLabel) {
+    case 'Volunteer':
+      return typeText.includes('volunteer')
+    case 'Internship':
+      return typeText.includes('intern')
+    case 'Mentorship':
+      return typeText.includes('mentor')
+    case 'Project':
+      return typeText.includes('project')
+    case 'Remote':
+      return modeText.includes('remote')
+    case 'In Person':
+      return modeText.includes('person') || modeText.includes('on-site') || modeText.includes('onsite')
+    case 'Hybrid':
+      return modeText.includes('hybrid')
+    case 'High School':
+      return eligibilityText.includes('high school')
+    case 'College':
+      return eligibilityText.includes('college')
+    case 'University':
+      return eligibilityText.includes('university')
+    default:
+      return true
+  }
+}
 
-      <div className="tag-list tag-list--dense">
-        <span className="tag-pill tag-pill--dark">{item.opportunity_type}</span>
-        <span className="tag-pill tag-pill--dark">{item.remote_or_in_person}</span>
-        <span className="tag-pill tag-pill--dark">{item.commitment}</span>
-        {item.deadline ? <span className="tag-pill tag-pill--dark">Deadline {item.deadline}</span> : null}
-      </div>
+function searchOpportunity(item, searchQuery) {
+  if (!searchQuery) return true
 
-      {item.skills_gained ? (
-        <p className="opportunity-card__meta">
-          <strong>Skills gained:</strong> {item.skills_gained}
-        </p>
-      ) : null}
+  const content = [
+    item.title,
+    item.description,
+    item.opportunity_type,
+    item.location,
+    item.remote_or_in_person,
+    item.commitment,
+    item.skills_gained,
+    item.eligibility,
+    item.organization_profiles?.organization_name,
+  ]
+    .filter(Boolean)
+    .join(' ')
+    .toLowerCase()
 
-      {user && role === 'student' ? (
-        <div className="button-row">
-          <button type="button" className="button button--outline motion-magnetic" onClick={() => onToggleSave(item.id, isSaved)}>
-            <span>{isSaved ? 'Remove save' : 'Save opportunity'}</span>
-          </button>
-          <button type="button" className="button button--filled motion-magnetic" onClick={() => onApply(item)}>
-            <span>{isApplied ? 'Update application activity' : 'Apply or show interest'}</span>
-          </button>
-        </div>
-      ) : (
-        <div className="button-row">
-          <Button
-            href={user ? getDashboardPathForRole(role) : '/auth?role=student'}
-            onNavigate={onNavigate}
-            currentPath={currentPath}
-          >
-            {user ? 'Go to dashboard' : 'Create student profile'}
-          </Button>
-        </div>
-      )}
-    </article>
-  )
+  return content.includes(searchQuery.toLowerCase())
 }
 
 export function OpportunitiesPage({ onNavigate, currentPath }) {
@@ -84,7 +86,9 @@ export function OpportunitiesPage({ onNavigate, currentPath }) {
   const [message, setMessage] = useState('')
   const [opportunities, setOpportunities] = useState([])
   const [savedIds, setSavedIds] = useState([])
-  const [appliedIds, setAppliedIds] = useState([])
+  const [applicationsByOpportunityId, setApplicationsByOpportunityId] = useState({})
+  const [searchValue, setSearchValue] = useState('')
+  const [activeFilters, setActiveFilters] = useState([])
 
   useEffect(() => {
     let isMounted = true
@@ -95,7 +99,6 @@ export function OpportunitiesPage({ onNavigate, currentPath }) {
 
       try {
         const approved = await getApprovedOpportunities()
-
         if (!isMounted) return
 
         setOpportunities(approved)
@@ -109,10 +112,15 @@ export function OpportunitiesPage({ onNavigate, currentPath }) {
           if (!isMounted) return
 
           setSavedIds(saved.map((item) => item.opportunity_id))
-          setAppliedIds(applications.map((item) => item.opportunity_id))
+          setApplicationsByOpportunityId(
+            applications.reduce((accumulator, item) => {
+              accumulator[item.opportunity_id] = item
+              return accumulator
+            }, {}),
+          )
         } else {
           setSavedIds([])
-          setAppliedIds([])
+          setApplicationsByOpportunityId({})
         }
 
         setStatus('ready')
@@ -130,13 +138,23 @@ export function OpportunitiesPage({ onNavigate, currentPath }) {
     }
   }, [role, user])
 
-  const emptyDescription = useMemo(() => {
-    if (role === 'student') {
-      return 'No approved opportunities are live yet. Create your profile so Kenisar can notify you as partner listings become available.'
-    }
+  const filteredOpportunities = useMemo(
+    () =>
+      opportunities.filter((item) => {
+        const matchesSearch = searchOpportunity(item, searchValue)
+        const matchesChips =
+          activeFilters.length === 0 || activeFilters.every((filterLabel) => matchesFilter(item, filterLabel))
 
-    return 'No approved opportunities are live yet. Kenisar is still onboarding and reviewing student-friendly partner listings.'
-  }, [role])
+        return matchesSearch && matchesChips
+      }),
+    [activeFilters, opportunities, searchValue],
+  )
+
+  function toggleFilter(filterLabel) {
+    setActiveFilters((current) =>
+      current.includes(filterLabel) ? current.filter((item) => item !== filterLabel) : [...current, filterLabel],
+    )
+  }
 
   async function handleToggleSave(opportunityId, isSaved) {
     if (!user) {
@@ -148,9 +166,11 @@ export function OpportunitiesPage({ onNavigate, currentPath }) {
       if (isSaved) {
         await removeSavedOpportunity(user.id, opportunityId)
         setSavedIds((current) => current.filter((item) => item !== opportunityId))
+        setMessage('Removed from your saved opportunities.')
       } else {
         await saveOpportunity(user.id, opportunityId)
         setSavedIds((current) => [...new Set([...current, opportunityId])])
+        setMessage('Saved to your opportunities list.')
       }
     } catch (error) {
       setMessage(error.message || 'Unable to update saved opportunities.')
@@ -163,9 +183,25 @@ export function OpportunitiesPage({ onNavigate, currentPath }) {
       return
     }
 
+    const existing = applicationsByOpportunityId[item.id]
+    if (existing) {
+      setMessage(existing.action_type === 'applied' ? 'You already applied to this opportunity.' : 'You already recorded interest in this opportunity.')
+      return
+    }
+
     try {
-      await recordOpportunityAction(user.id, item.id, item.application_link ? 'applied' : 'interested')
-      setAppliedIds((current) => [...new Set([...current, item.id])])
+      const created = await recordOpportunityAction(user.id, item.id, item.application_link ? 'applied' : 'interested')
+      setApplicationsByOpportunityId((current) => ({
+        ...current,
+        [item.id]: created,
+      }))
+      setMessage(
+        created.duplicate
+          ? 'Your opportunity activity was already recorded.'
+          : item.application_link
+            ? 'Application recorded. The external application link opened in a new tab.'
+            : 'Your interest was recorded successfully.',
+      )
 
       if (item.application_link) {
         window.open(item.application_link, '_blank', 'noopener,noreferrer')
@@ -173,6 +209,63 @@ export function OpportunitiesPage({ onNavigate, currentPath }) {
     } catch (error) {
       setMessage(error.message || 'Unable to record your opportunity activity.')
     }
+  }
+
+  function renderSidebarActions() {
+    if (!user) {
+      return (
+        <div className="button-row">
+          <Button href="/auth" onNavigate={onNavigate} currentPath={currentPath}>
+            Get started
+          </Button>
+          <Button href="/partners" onNavigate={onNavigate} currentPath={currentPath} variant="outline">
+            For organizations
+          </Button>
+        </div>
+      )
+    }
+
+    if (role === 'student') {
+      return (
+        <div className="button-row">
+          <Button href="/dashboard/student" onNavigate={onNavigate} currentPath={currentPath}>
+            Student dashboard
+          </Button>
+          <Button href="/saved" onNavigate={onNavigate} currentPath={currentPath} variant="outline">
+            Saved opportunities
+          </Button>
+        </div>
+      )
+    }
+
+    if (role === 'organization') {
+      return (
+        <div className="button-row">
+          <Button href="/dashboard/organization" onNavigate={onNavigate} currentPath={currentPath}>
+            Organization dashboard
+          </Button>
+          <Button href="/opportunities/manage" onNavigate={onNavigate} currentPath={currentPath} variant="outline">
+            Manage listings
+          </Button>
+        </div>
+      )
+    }
+
+    return (
+      <div className="button-row">
+        <Button href="/admin" onNavigate={onNavigate} currentPath={currentPath}>
+          Review listings
+        </Button>
+        <Button
+          href={getDashboardPathForRole(role)}
+          onNavigate={onNavigate}
+          currentPath={currentPath}
+          variant="outline"
+        >
+          Admin dashboard
+        </Button>
+      </div>
+    )
   }
 
   if (status === 'loading') {
@@ -205,42 +298,48 @@ export function OpportunitiesPage({ onNavigate, currentPath }) {
     <div className="page">
       <PageHero
         label="Opportunities"
-        title="Browse approved student opportunities."
-        description="Only approved listings appear here. Students can save opportunities, apply, or show interest once they have an account."
+        title="Student opportunities, reviewed and ready to browse."
+        description="Search approved listings, filter by opportunity type and format, and take action when a role fits your direction."
         theme="opportunities"
       />
 
       <section className="section section--narrow" data-reveal="section">
         <div className="page-cluster page-cluster--opportunities">
-          <div className="content-card content-card--light content-card--support" data-reveal="card" data-tilt>
-            <SectionLabel>How it works</SectionLabel>
-            <h2>Kenisar publishes only approved listings.</h2>
-            <p>
-              Organization listings stay private until Kenisar reviews them. That keeps the public opportunities page
-              honest and student-friendly.
-            </p>
-            <ul className="detail-list">
-              <li>Students can create profiles, save listings, and track where they have shown interest.</li>
-              <li>Organizations can save drafts and submit listings for review.</li>
-              <li>Only approved listings appear publicly.</li>
-            </ul>
+          <div className="content-card content-card--light opportunity-toolbar" data-reveal="card" data-tilt>
+            <SectionLabel>Search and filter</SectionLabel>
+            <h2>Browse the marketplace with more signal.</h2>
+            <label className="search-field">
+              <span>Search opportunities</span>
+              <input
+                type="search"
+                value={searchValue}
+                onChange={(event) => setSearchValue(event.target.value)}
+                placeholder="Search by title, organization, skill, or location"
+              />
+            </label>
+
+            <div className="filter-chip-row">
+              {filters.map((filterLabel) => (
+                <button
+                  key={filterLabel}
+                  type="button"
+                  className={`filter-chip ${activeFilters.includes(filterLabel) ? 'filter-chip--active' : ''}`}
+                  onClick={() => toggleFilter(filterLabel)}
+                >
+                  {filterLabel}
+                </button>
+              ))}
+            </div>
           </div>
 
           <aside className="content-card content-card--light content-card--support" data-reveal="card" data-tilt>
             <SectionLabel>Quick actions</SectionLabel>
-            <h2>{user ? 'Keep moving inside your account.' : 'Create an account to take action.'}</h2>
-            <div className="button-row">
-              <Button
-                href={user ? getDashboardPathForRole(role) : '/auth?role=student'}
-                onNavigate={onNavigate}
-                currentPath={currentPath}
-              >
-                {user ? 'Dashboard' : 'Create student profile'}
-              </Button>
-              <Button href="/auth?role=organization" onNavigate={onNavigate} currentPath={currentPath} variant="accent">
-                Create organization account
-              </Button>
-            </div>
+            <h2>{user ? 'Use the right account workflow.' : 'Take the next honest step.'}</h2>
+            <p>
+              Only approved listings appear here. Students can save and apply. Organizations can manage submitted
+              listings. Admins can review what goes public.
+            </p>
+            {renderSidebarActions()}
           </aside>
         </div>
       </section>
@@ -248,37 +347,74 @@ export function OpportunitiesPage({ onNavigate, currentPath }) {
       <section className="section" data-reveal="section">
         <SectionLabel>Approved listings</SectionLabel>
         {message ? (
-          <div className="form-status form-status--error" role="alert">
+          <div className="form-status form-status--success" role="status">
             <p>{message}</p>
           </div>
         ) : null}
 
         <div className="dashboard-stack">
-          {opportunities.length > 0 ? (
-            opportunities.map((item) => (
-              <OpportunityCard
-                key={item.id}
-                currentPath={currentPath}
-                isApplied={appliedIds.includes(item.id)}
-                isSaved={savedIds.includes(item.id)}
-                item={item}
-                onApply={handleApply}
-                onNavigate={onNavigate}
-                onToggleSave={handleToggleSave}
-                role={role}
-                user={user}
-              />
-            ))
+          {filteredOpportunities.length > 0 ? (
+            filteredOpportunities.map((item) => {
+              const isSaved = savedIds.includes(item.id)
+              const application = applicationsByOpportunityId[item.id]
+
+              return (
+                <OpportunitySummaryCard
+                  key={item.id}
+                  item={item}
+                  currentPath={currentPath}
+                  onNavigate={onNavigate}
+                  opportunityHref={`/opportunities/${item.id}`}
+                  organizationHref={item.organization_id ? `/organizations/${item.organization_id}` : null}
+                  secondaryMeta={[`Listed ${formatDateLabel(item.created_at)}`]}
+                >
+                  <Button href={`/opportunities/${item.id}`} onNavigate={onNavigate} currentPath={currentPath} variant="outline">
+                    View details
+                  </Button>
+                  {user && role === 'student' ? (
+                    <>
+                      <Button variant="accent" onClick={() => handleToggleSave(item.id, isSaved)}>
+                        {isSaved ? 'Remove save' : 'Save'}
+                      </Button>
+                      <Button onClick={() => handleApply(item)} disabled={Boolean(application)}>
+                        {application
+                          ? application.action_type === 'applied'
+                            ? 'Already applied'
+                            : 'Interest recorded'
+                          : item.application_link
+                            ? 'Apply now'
+                            : 'Show interest'}
+                      </Button>
+                    </>
+                  ) : !user ? (
+                    <Button href="/auth?role=student" onNavigate={onNavigate} currentPath={currentPath}>
+                      Log in to apply
+                    </Button>
+                  ) : role === 'organization' ? (
+                    <Button href="/opportunities/manage" onNavigate={onNavigate} currentPath={currentPath}>
+                      Manage listings
+                    </Button>
+                  ) : (
+                    <Button href="/admin" onNavigate={onNavigate} currentPath={currentPath}>
+                      Review listing
+                    </Button>
+                  )}
+                </OpportunitySummaryCard>
+              )
+            })
           ) : (
             <div className="empty-state-card" data-tilt>
-              <h2>No opportunities are live yet.</h2>
-              <p>{emptyDescription}</p>
+              <h2>No opportunities match your filters yet.</h2>
+              <p>
+                Try clearing the search or filters, or come back as more approved student-friendly opportunities are
+                published.
+              </p>
               <div className="button-row">
-                <Button href="/auth?role=student" onNavigate={onNavigate} currentPath={currentPath}>
-                  Create student profile
+                <Button variant="outline" onClick={() => setActiveFilters([])}>
+                  Clear filters
                 </Button>
-                <Button href="/auth?role=organization" onNavigate={onNavigate} currentPath={currentPath} variant="accent">
-                  Create organization account
+                <Button variant="accent" onClick={() => setSearchValue('')}>
+                  Clear search
                 </Button>
               </div>
             </div>

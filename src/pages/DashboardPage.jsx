@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
+import { OpportunitySummaryCard } from '../components/opportunities/OpportunitySummaryCard'
 import { useAuth } from '../components/auth/useAuth'
 import { Button } from '../components/ui/Button'
 import { PageHero } from '../components/ui/PageHero'
@@ -8,6 +9,7 @@ import {
   calculateProfileCompletion,
   ensureOrganizationProfileExists,
   ensureStudentProfileExists,
+  getApprovedOpportunities,
   getOrganizationOpportunities,
   getStudentApplications,
   getStudentSavedOpportunities,
@@ -44,26 +46,13 @@ function MetricCard({ label, value, hint }) {
   )
 }
 
-function OpportunityRecord({ actionLabel, item }) {
-  const opportunity = item?.opportunities
-
-  if (!opportunity) return null
-
+function QuickActionCard({ description, href, label, onNavigate, currentPath, variant = 'outline' }) {
   return (
-    <article className="content-card content-card--light dashboard-record" data-reveal="card" data-tilt>
-      <div className="dashboard-record__header">
-        <div>
-          <h2>{opportunity.title}</h2>
-          <p>{opportunity.organization_profiles?.organization_name ?? 'Kenisar partner'}</p>
-        </div>
-        {item.action_type ? <StatusBadge status={item.action_type} /> : null}
-      </div>
-      <div className="tag-list tag-list--dense">
-        <span className="tag-pill tag-pill--dark">{opportunity.opportunity_type}</span>
-        <span className="tag-pill tag-pill--dark">{opportunity.location}</span>
-        <span className="tag-pill tag-pill--dark">{opportunity.remote_or_in_person}</span>
-      </div>
-      {actionLabel ? <p>{actionLabel}</p> : null}
+    <article className="content-card content-card--light quick-action-card" data-reveal="card" data-tilt>
+      <p>{description}</p>
+      <Button href={href} onNavigate={onNavigate} currentPath={currentPath} variant={variant}>
+        {label}
+      </Button>
     </article>
   )
 }
@@ -74,6 +63,7 @@ export function DashboardPage({ currentPath, onNavigate, role }) {
     applications: [],
     opportunities: [],
     profile: null,
+    recommended: [],
     saved: [],
   })
   const [status, setStatus] = useState('loading')
@@ -90,17 +80,31 @@ export function DashboardPage({ currentPath, onNavigate, role }) {
 
       try {
         if (role === 'student') {
-          const [profile, saved, applications] = await Promise.all([
+          const [profile, saved, applications, approved] = await Promise.all([
             ensureStudentProfileExists(user),
             getStudentSavedOpportunities(user.id),
             getStudentApplications(user.id),
+            getApprovedOpportunities(),
           ])
 
           if (!isMounted) return
+
+          const applicationIds = new Set(applications.map((item) => item.opportunity_id))
+          const savedIds = new Set(saved.map((item) => item.opportunity_id))
+          const recommended = approved
+            .filter((item) => !applicationIds.has(item.id))
+            .sort((left, right) => {
+              const leftSaved = savedIds.has(left.id) ? 1 : 0
+              const rightSaved = savedIds.has(right.id) ? 1 : 0
+              return rightSaved - leftSaved
+            })
+            .slice(0, 3)
+
           setData({
             applications,
             opportunities: [],
             profile,
+            recommended,
             saved,
           })
         } else {
@@ -110,10 +114,12 @@ export function DashboardPage({ currentPath, onNavigate, role }) {
           ])
 
           if (!isMounted) return
+
           setData({
             applications: [],
             opportunities,
             profile,
+            recommended: [],
             saved: [],
           })
         }
@@ -166,12 +172,6 @@ export function DashboardPage({ currentPath, onNavigate, role }) {
     onNavigate('/')
   }
 
-  const studentNextSteps = [
-    completion < 100 ? 'Complete the remaining profile fields so Kenisar can match you more accurately.' : null,
-    data.saved.length === 0 ? 'Browse approved opportunities and save the ones you want to revisit.' : null,
-    data.applications.length === 0 ? 'Show interest in your first opportunity to start building momentum.' : null,
-  ].filter(Boolean)
-
   if (status === 'loading') {
     return (
       <div className="page">
@@ -202,16 +202,20 @@ export function DashboardPage({ currentPath, onNavigate, role }) {
     <div className="page">
       <PageHero
         label={role === 'student' ? 'Student Dashboard' : 'Organization Dashboard'}
-        title={role === 'student' ? 'Your early-career dashboard.' : 'Manage your organization account.'}
+        title={
+          role === 'student'
+            ? `Welcome back${data.profile?.full_name ? `, ${data.profile.full_name}` : ''}.`
+            : data.profile?.organization_name || 'Manage your organization account.'
+        }
         description={
           role === 'student'
-            ? 'Track your profile, saved opportunities, and application activity in one place.'
-            : 'Keep your profile current, submit listings, and monitor review status from one dashboard.'
+            ? 'Track your profile, saved opportunities, recommendations, and application activity in one place.'
+            : 'Keep your organization profile current, create listings, and manage reviewed opportunities from one dashboard.'
         }
         theme={role === 'student' ? 'students' : 'partners'}
       />
 
-      <section className="section" data-reveal="section">
+      <section className="section section--narrow" data-reveal="section">
         <div className="button-row">
           <Button
             href={role === 'student' ? '/profile/student' : '/profile/organization'}
@@ -226,7 +230,7 @@ export function DashboardPage({ currentPath, onNavigate, role }) {
             currentPath={currentPath}
             variant="accent"
           >
-            {role === 'student' ? 'Find opportunities' : 'Create opportunity listing'}
+            {role === 'student' ? 'Browse opportunities' : 'Create opportunity'}
           </Button>
           <Button variant="outline" onClick={handleSignOut}>
             Sign out
@@ -241,8 +245,8 @@ export function DashboardPage({ currentPath, onNavigate, role }) {
             value={`${completion}%`}
             hint={
               role === 'student'
-                ? 'A stronger profile helps Kenisar surface more relevant opportunities.'
-                : 'A complete organization profile makes listings easier to review.'
+                ? 'A stronger profile helps Kenisar surface better-fit opportunities.'
+                : 'A complete organization profile helps reviewers understand your listings faster.'
             }
           />
           <MetricCard
@@ -250,17 +254,17 @@ export function DashboardPage({ currentPath, onNavigate, role }) {
             value={role === 'student' ? data.saved.length : opportunitySummary?.total ?? 0}
             hint={
               role === 'student'
-                ? 'Saved opportunities stay here so you can revisit them later.'
-                : 'Every listing stays private until Kenisar reviews it.'
+                ? 'Saved opportunities stay here so you can return with more context.'
+                : 'Every listing starts as a draft or pending review before it can go public.'
             }
           />
           <MetricCard
-            label={role === 'student' ? 'Applied or interested' : 'Pending review'}
+            label={role === 'student' ? 'Applications' : 'Pending review'}
             value={role === 'student' ? data.applications.length : opportunitySummary?.pending ?? 0}
             hint={
               role === 'student'
-                ? 'Track the opportunities where you have already taken action.'
-                : 'Pending listings are waiting for Kenisar approval before going public.'
+                ? 'Track where you already applied or showed interest.'
+                : 'Pending opportunities are waiting for Kenisar review.'
             }
           />
         </div>
@@ -269,50 +273,112 @@ export function DashboardPage({ currentPath, onNavigate, role }) {
       {role === 'student' ? (
         <>
           <section className="section" data-reveal="section">
-            <div className="section-panel section-panel--light">
-              <SectionLabel>Recommended next steps</SectionLabel>
-              <h2 className="section-heading">Keep building your profile and activity.</h2>
-              {studentNextSteps.length > 0 ? (
-                <ul className="detail-list">
-                  {studentNextSteps.map((step) => (
-                    <li key={step}>{step}</li>
-                  ))}
-                </ul>
-              ) : (
-                <p className="section-intro">Your account is in a strong place. Keep checking approved opportunities.</p>
-              )}
+            <SectionLabel>Quick actions</SectionLabel>
+            <div className="card-grid card-grid--four">
+              <QuickActionCard
+                description="Keep browsing approved roles that match your interests."
+                href="/opportunities"
+                label="Browse opportunities"
+                onNavigate={onNavigate}
+                currentPath={currentPath}
+              />
+              <QuickActionCard
+                description="Refine your details so opportunities can fit you better."
+                href="/profile/student"
+                label="Edit profile"
+                onNavigate={onNavigate}
+                currentPath={currentPath}
+                variant="accent"
+              />
+              <QuickActionCard
+                description="Return to the listings you bookmarked for later."
+                href="/saved"
+                label="View saved opportunities"
+                onNavigate={onNavigate}
+                currentPath={currentPath}
+              />
+              <QuickActionCard
+                description="Track every application and interest submission."
+                href="/applications"
+                label="View applications"
+                onNavigate={onNavigate}
+                currentPath={currentPath}
+              />
             </div>
           </section>
 
           <section className="section" data-reveal="section">
-            <SectionLabel>Saved opportunities</SectionLabel>
+            <SectionLabel>Recommended opportunities</SectionLabel>
             <div className="dashboard-stack">
-              {data.saved.length > 0 ? (
-                data.saved.map((item) => <OpportunityRecord key={item.id} actionLabel="Saved for later." item={item} />)
+              {data.recommended.length > 0 ? (
+                data.recommended.map((opportunity) => (
+                  <OpportunitySummaryCard
+                    key={opportunity.id}
+                    item={opportunity}
+                    currentPath={currentPath}
+                    onNavigate={onNavigate}
+                    opportunityHref={`/opportunities/${opportunity.id}`}
+                    organizationHref={
+                      opportunity.organization_id ? `/organizations/${opportunity.organization_id}` : null
+                    }
+                  >
+                    <Button href={`/opportunities/${opportunity.id}`} onNavigate={onNavigate} currentPath={currentPath}>
+                      View opportunity
+                    </Button>
+                  </OpportunitySummaryCard>
+                ))
               ) : (
                 <div className="empty-state-card" data-tilt>
-                  <h2>You haven't saved any opportunities yet.</h2>
-                  <p>Browse approved listings and save the ones you want to revisit.</p>
+                  <h2>No recommendations yet.</h2>
+                  <p>As more approved opportunities are published, Kenisar will surface stronger matches here.</p>
+                  <div className="button-row">
+                    <Button href="/opportunities" onNavigate={onNavigate} currentPath={currentPath}>
+                      Browse opportunities
+                    </Button>
+                  </div>
                 </div>
               )}
             </div>
           </section>
 
           <section className="section" data-reveal="section">
-            <SectionLabel>Applied or interested</SectionLabel>
+            <SectionLabel>Recent applications</SectionLabel>
             <div className="dashboard-stack">
               {data.applications.length > 0 ? (
-                data.applications.map((item) => (
-                  <OpportunityRecord
-                    key={item.id}
-                    actionLabel={item.action_type === 'applied' ? 'Application recorded.' : 'Interest recorded.'}
-                    item={item}
-                  />
+                data.applications.slice(0, 3).map((application) => (
+                  <OpportunitySummaryCard
+                    key={application.id}
+                    item={application.opportunities}
+                    currentPath={currentPath}
+                    onNavigate={onNavigate}
+                    opportunityHref={`/opportunities/${application.opportunity_id}`}
+                    organizationHref={
+                      application.opportunities?.organization_id
+                        ? `/organizations/${application.opportunities.organization_id}`
+                        : null
+                    }
+                    secondaryMeta={[`Submitted ${application.created_at ? new Date(application.created_at).toLocaleDateString() : 'recently'}`]}
+                  >
+                    <StatusBadge status={application.action_type} />
+                    <StatusBadge status={application.status} />
+                    <Button
+                      href={`/opportunities/${application.opportunity_id}`}
+                      onNavigate={onNavigate}
+                      currentPath={currentPath}
+                    >
+                      View listing
+                    </Button>
+                  </OpportunitySummaryCard>
                 ))
               ) : (
                 <div className="empty-state-card" data-tilt>
-                  <h2>You haven't applied or shown interest yet.</h2>
-                  <p>When you take action on an opportunity, it will appear here.</p>
+                  <h2>No applications yet.</h2>
+                  <p>When you apply or show interest in a listing, it will show up here.</p>
+                  <div className="button-row">
+                    <Button href="/opportunities" onNavigate={onNavigate} currentPath={currentPath}>
+                      Browse opportunities
+                    </Button>
+                  </div>
                 </div>
               )}
             </div>
@@ -322,45 +388,38 @@ export function DashboardPage({ currentPath, onNavigate, role }) {
         <>
           <section className="section" data-reveal="section">
             <div className="card-grid card-grid--four">
-              <MetricCard label="Draft" value={opportunitySummary?.draft ?? 0} hint="Private to your organization." />
-              <MetricCard label="Pending" value={opportunitySummary?.pending ?? 0} hint="Submitted for Kenisar review." />
+              <MetricCard label="Draft" value={opportunitySummary?.draft ?? 0} hint="Private until you submit for review." />
+              <MetricCard label="Pending" value={opportunitySummary?.pending ?? 0} hint="Waiting for Kenisar approval." />
               <MetricCard label="Approved" value={opportunitySummary?.approved ?? 0} hint="Visible on the public opportunities page." />
-              <MetricCard label="Rejected" value={opportunitySummary?.rejected ?? 0} hint="Needs edits before it can be reconsidered." />
+              <MetricCard label="Rejected" value={opportunitySummary?.rejected ?? 0} hint="Needs edits before it can return to review." />
             </div>
           </section>
 
           <section className="section" data-reveal="section">
-            <div className="page-cluster page-cluster--opportunities">
-              <div className="content-card content-card--light" data-reveal="card" data-tilt>
-                <SectionLabel>Organization profile</SectionLabel>
-                <h2>{data.profile?.organization_name || 'Complete your organization profile.'}</h2>
-                <p>
-                  {data.profile?.description ||
-                    'Add your organization details so Kenisar can review your listings with the right context.'}
-                </p>
-                <ul className="detail-list">
-                  <li>{data.profile?.contact_name || 'Add a contact name for approvals and follow-up.'}</li>
-                  <li>{data.profile?.organization_type || 'Choose the kind of organization you represent.'}</li>
-                  <li>{data.profile?.city || 'Add your city to clarify where students can work with you.'}</li>
-                </ul>
-              </div>
-
-              <aside className="content-card content-card--light content-card--support" data-reveal="card" data-tilt>
-                <SectionLabel>Listings</SectionLabel>
-                <h2>{data.opportunities.length > 0 ? 'Manage submitted listings.' : 'Create your first opportunity listing.'}</h2>
-                <p>
-                  Drafts stay private. Submitted listings move to pending review, and only approved listings appear
-                  publicly.
-                </p>
-                <div className="button-row">
-                  <Button href="/opportunities/new" onNavigate={onNavigate} currentPath={currentPath}>
-                    New listing
-                  </Button>
-                  <Button href="/opportunities/manage" onNavigate={onNavigate} currentPath={currentPath} variant="outline">
-                    Manage listings
-                  </Button>
-                </div>
-              </aside>
+            <SectionLabel>Organization quick actions</SectionLabel>
+            <div className="card-grid card-grid--three">
+              <QuickActionCard
+                description="Publish a new beginner-friendly role, project, or mentorship."
+                href="/opportunities/new"
+                label="Create opportunity"
+                onNavigate={onNavigate}
+                currentPath={currentPath}
+                variant="accent"
+              />
+              <QuickActionCard
+                description="Review drafts, pending items, approvals, and public visibility."
+                href="/opportunities/manage"
+                label="Manage listings"
+                onNavigate={onNavigate}
+                currentPath={currentPath}
+              />
+              <QuickActionCard
+                description="Keep your organization details current for better review context."
+                href="/profile/organization"
+                label="Edit organization profile"
+                onNavigate={onNavigate}
+                currentPath={currentPath}
+              />
             </div>
           </section>
 
@@ -369,23 +428,43 @@ export function DashboardPage({ currentPath, onNavigate, role }) {
             <div className="dashboard-stack">
               {data.opportunities.length > 0 ? (
                 data.opportunities.slice(0, 4).map((opportunity) => (
-                  <article className="content-card content-card--light dashboard-record" key={opportunity.id} data-reveal="card" data-tilt>
-                    <div className="dashboard-record__header">
-                      <div>
-                        <h2>{opportunity.title}</h2>
-                        <p>
-                          {opportunity.opportunity_type} · {opportunity.location}
-                        </p>
-                      </div>
-                      <StatusBadge status={opportunity.status} />
-                    </div>
-                    <p>{opportunity.description}</p>
-                  </article>
+                  <OpportunitySummaryCard
+                    key={opportunity.id}
+                    item={opportunity}
+                    currentPath={currentPath}
+                    onNavigate={onNavigate}
+                    opportunityHref={`/opportunities/${opportunity.id}`}
+                    secondaryMeta={[
+                      opportunity.status === 'approved' ? 'Publicly visible' : 'Not public yet',
+                    ]}
+                  >
+                    <Button
+                      href={`/opportunities/new?id=${opportunity.id}`}
+                      onNavigate={onNavigate}
+                      currentPath={currentPath}
+                      variant="outline"
+                    >
+                      Edit listing
+                    </Button>
+                    <Button
+                      href={`/opportunities/${opportunity.id}/applicants`}
+                      onNavigate={onNavigate}
+                      currentPath={currentPath}
+                      variant="accent"
+                    >
+                      View applicants
+                    </Button>
+                  </OpportunitySummaryCard>
                 ))
               ) : (
                 <div className="empty-state-card" data-tilt>
                   <h2>Create your first opportunity listing.</h2>
-                  <p>Organizations can save drafts or submit beginner-friendly roles for review.</p>
+                  <p>Drafts, pending listings, and approved opportunities will appear here once you start publishing.</p>
+                  <div className="button-row">
+                    <Button href="/opportunities/new" onNavigate={onNavigate} currentPath={currentPath}>
+                      Create opportunity
+                    </Button>
+                  </div>
                 </div>
               )}
             </div>

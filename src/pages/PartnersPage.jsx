@@ -33,6 +33,26 @@ export function PartnersPage({ onNavigate, currentPath }) {
         </div>
       </section>
 
+      <section className="section" data-reveal="section">
+        <div className="card-grid card-grid--three">
+          <ContentCard
+            title="What you can post"
+            description="Share internships, volunteering, mentorships, workshops, project-based roles, and other beginner-friendly opportunities."
+            variant="light"
+          />
+          <ContentCard
+            title="How approval works"
+            description="Listings move from draft to pending review, then become approved or rejected before they ever appear on the public opportunities page."
+            variant="light"
+          />
+          <ContentCard
+            title="What happens after students apply"
+            description="Students can save or apply to approved opportunities, and your team can review applicants inside the organization workflow."
+            variant="light"
+          />
+        </div>
+      </section>
+
       <section className="section section--narrow" data-reveal="section">
         <div className="page-stack">
           <div className="content-card content-card--light page-intro-card" data-reveal="card" data-tilt>
@@ -47,8 +67,8 @@ export function PartnersPage({ onNavigate, currentPath }) {
               <Button href="/auth?role=organization" onNavigate={onNavigate} currentPath={currentPath}>
                 Create organization account
               </Button>
-              <Button href="/dashboard/organization" onNavigate={onNavigate} currentPath={currentPath} variant="outline">
-                Organization dashboard
+              <Button href="/opportunities" onNavigate={onNavigate} currentPath={currentPath} variant="outline">
+                Browse opportunities
               </Button>
             </div>
             <div className="tag-list tag-list--dense">

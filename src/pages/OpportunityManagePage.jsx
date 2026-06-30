@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react'
+import { OpportunitySummaryCard } from '../components/opportunities/OpportunitySummaryCard'
 import { useAuth } from '../components/auth/useAuth'
 import { Button } from '../components/ui/Button'
 import { PageHero } from '../components/ui/PageHero'
 import { SectionLabel } from '../components/ui/SectionLabel'
-import { StatusBadge } from '../components/ui/StatusBadge'
 import { getOrganizationOpportunities } from '../lib/kenisarApi'
 
 export function OpportunityManagePage({ currentPath, onNavigate }) {
@@ -66,7 +66,7 @@ export function OpportunityManagePage({ currentPath, onNavigate }) {
       <PageHero
         label="Manage Listings"
         title="Manage your opportunity listings."
-        description="Track listing status, open drafts for editing, and keep submitted opportunities organized."
+        description="Track draft, pending, approved, and rejected listings from one place and open applicant review when students respond."
         theme="partners"
       />
 
@@ -86,37 +86,41 @@ export function OpportunityManagePage({ currentPath, onNavigate }) {
         <div className="dashboard-stack">
           {opportunities.length > 0 ? (
             opportunities.map((opportunity) => (
-              <article className="content-card content-card--light dashboard-record" key={opportunity.id} data-reveal="card" data-tilt>
-                <div className="dashboard-record__header">
-                  <div>
-                    <h2>{opportunity.title}</h2>
-                    <p>
-                      {opportunity.opportunity_type} · {opportunity.location} · {opportunity.remote_or_in_person}
-                    </p>
-                  </div>
-                  <StatusBadge status={opportunity.status} />
-                </div>
-                <p>{opportunity.description}</p>
-                <div className="tag-list tag-list--dense">
-                  <span className="tag-pill tag-pill--dark">{opportunity.commitment}</span>
-                  {opportunity.deadline ? <span className="tag-pill tag-pill--dark">Deadline {opportunity.deadline}</span> : null}
-                </div>
-                <div className="button-row">
-                  <Button
-                    href={`/opportunities/new?id=${opportunity.id}`}
-                    onNavigate={onNavigate}
-                    currentPath={currentPath}
-                    variant="accent"
-                  >
-                    Edit listing
-                  </Button>
-                </div>
-              </article>
+              <OpportunitySummaryCard
+                key={opportunity.id}
+                item={opportunity}
+                currentPath={currentPath}
+                onNavigate={onNavigate}
+                opportunityHref={opportunity.status === 'approved' ? `/opportunities/${opportunity.id}` : null}
+                secondaryMeta={[opportunity.status === 'approved' ? 'Public listing available' : 'Private until approved']}
+              >
+                <Button
+                  href={`/opportunities/new?id=${opportunity.id}`}
+                  onNavigate={onNavigate}
+                  currentPath={currentPath}
+                  variant="outline"
+                >
+                  Edit listing
+                </Button>
+                <Button
+                  href={`/opportunities/${opportunity.id}/applicants`}
+                  onNavigate={onNavigate}
+                  currentPath={currentPath}
+                  variant="accent"
+                >
+                  View applicants
+                </Button>
+              </OpportunitySummaryCard>
             ))
           ) : (
             <div className="empty-state-card" data-tilt>
               <h2>Create your first opportunity listing.</h2>
               <p>Drafts, pending listings, and approved opportunities will appear here once you start publishing.</p>
+              <div className="button-row">
+                <Button href="/opportunities/new" onNavigate={onNavigate} currentPath={currentPath}>
+                  Create opportunity
+                </Button>
+              </div>
             </div>
           )}
         </div>

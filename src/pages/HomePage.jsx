@@ -269,16 +269,17 @@ function Hero({ onNavigate, currentPath, role, user }) {
         buttons: [
           { href: '/auth', label: 'Get Started', variant: 'filled' },
           { href: '/opportunities', label: 'Browse Opportunities', variant: 'outline' },
+          { href: '/partners', label: 'For Organizations', variant: 'secondary' },
         ],
         note: 'Student-first onboarding. Honest product signals. Built to grow into something real.',
         title: (
           <>
-            Real-world experience
-            <span>before you graduate.</span>
+            Find volunteering, internships,
+            <span>mentorships, and projects built for students.</span>
           </>
         ),
         description:
-          'Kenisar helps high school, college, and university students get closer to mentorship, projects, volunteering, internships, and partnerships that build real momentum.',
+          'Kenisar helps high school, college, and university students discover beginner-friendly opportunities before graduation, while organizations create clearer paths into real first experience.',
         secondary:
           'We are still early. That means no fake listings, no inflated claims, and no pretending the platform is further along than it is.',
       }
@@ -372,7 +373,98 @@ function Hero({ onNavigate, currentPath, role, user }) {
   )
 }
 
-function PremiumCard({ title, description, icon, note, stepNumber, variant = 'light', revealDelay = '0ms' }) {
+function LoggedInActionStage({ currentPath, onNavigate, role }) {
+  const actionSets =
+    role === 'organization'
+      ? [
+          {
+            title: 'Organization Dashboard',
+            description: 'Check profile completion, listing status, and next steps for your account.',
+            href: '/dashboard/organization',
+          },
+          {
+            title: 'Create Opportunity',
+            description: 'Publish a new volunteering role, internship, mentorship, or project.',
+            href: '/opportunities/new',
+          },
+          {
+            title: 'Manage Listings',
+            description: 'Open drafts, pending review items, and applicant review links.',
+            href: '/opportunities/manage',
+          },
+        ]
+      : role === 'admin'
+        ? [
+            {
+              title: 'Admin Dashboard',
+              description: 'Stay on top of pending, approved, and rejected listings.',
+              href: '/dashboard/admin',
+            },
+            {
+              title: 'Review Listings',
+              description: 'Approve or reject organization-submitted opportunities.',
+              href: '/admin',
+            },
+            {
+              title: 'Browse Opportunities',
+              description: 'See the public marketplace as students see it.',
+              href: '/opportunities',
+            },
+          ]
+        : [
+            {
+              title: 'Student Dashboard',
+              description: 'Track profile completion, saved opportunities, and recent applications.',
+              href: '/dashboard/student',
+            },
+            {
+              title: 'Browse Opportunities',
+              description: 'Search reviewed listings and explore what is live now.',
+              href: '/opportunities',
+            },
+            {
+              title: 'Saved Opportunities',
+              description: 'Revisit the opportunities you bookmarked for later.',
+              href: '/saved',
+            },
+            {
+              title: 'Applications',
+              description: 'See where you already applied or showed interest.',
+              href: '/applications',
+            },
+          ]
+
+  return (
+    <section className="section section--home-overview">
+      <div className="home-stage home-stage--glass" data-reveal="section" style={{ '--reveal-delay': '60ms' }}>
+        <SectionLabel centered>Pick up where you left off</SectionLabel>
+        <h2 className="section-heading section-heading--centered">Use Kenisar like a real product workspace.</h2>
+        <p className="section-intro section-intro--centered">
+          Your next steps should match your role, not restart the public marketing journey.
+        </p>
+
+        <div className={`card-grid ${actionSets.length === 4 ? 'card-grid--four' : 'card-grid--three'} card-grid--home-premium`}>
+          {actionSets.map((action, index) => (
+            <PremiumCard
+              key={action.title}
+              title={action.title}
+              description={action.description}
+              note="Open now"
+              variant="light"
+              revealDelay={`${140 + index * 110}ms`}
+            >
+              <Button href={action.href} onNavigate={onNavigate} currentPath={currentPath}>
+                {action.title}
+              </Button>
+            </PremiumCard>
+          ))}
+        </div>
+      </div>
+    </section>
+  )
+}
+
+function PremiumCard({ title, description, icon, note, stepNumber, variant = 'light', revealDelay = '0ms', children }) {
   return (
     <article
       className={`content-card content-card--premium ${variant === 'light' ? 'content-card--light' : ''}`}
@@ -391,6 +483,7 @@ function PremiumCard({ title, description, icon, note, stepNumber, variant = 'li
         <h2>{title}</h2>
         <p>{description}</p>
         {note ? <span className="content-card__note">{note}</span> : null}
+        {children ? <div className="content-card__actions">{children}</div> : null}
       </div>
     </article>
   )
@@ -507,6 +600,7 @@ function HomeClosing({ onNavigate, currentPath, role, user }) {
 
 export function HomePage({ onNavigate, currentPath }) {
   const { role, user } = useAuth()
+  const resolvedRole = role === 'admin' || isAdminUser(user) ? 'admin' : role
 
   useEffect(() => {
     const page = document.querySelector('.page--home')
@@ -567,57 +661,62 @@ export function HomePage({ onNavigate, currentPath }) {
   return (
     <div className="page page--home">
       <Hero onNavigate={onNavigate} currentPath={currentPath} role={role} user={user} />
+      {user ? (
+        <LoggedInActionStage currentPath={currentPath} onNavigate={onNavigate} role={resolvedRole} />
+      ) : (
+        <>
+          <section className="section section--home-overview" id="what-kenisar-is">
+            <div className="home-stage home-stage--glass" data-reveal="section" style={{ '--reveal-delay': '60ms' }}>
+              <SectionLabel centered>What Kenisar is</SectionLabel>
+              <h2 className="section-heading section-heading--centered">A cleaner way to begin before graduation.</h2>
+              <p className="section-intro section-intro--centered">
+                Kenisar is building a more thoughtful platform for students who need real-world experience, not a crowded
+                job board pretending everyone already has it figured out.
+              </p>
 
-      <section className="section section--home-overview" id="what-kenisar-is">
-        <div className="home-stage home-stage--glass" data-reveal="section" style={{ '--reveal-delay': '60ms' }}>
-          <SectionLabel centered>What Kenisar is</SectionLabel>
-          <h2 className="section-heading section-heading--centered">A cleaner way to begin before graduation.</h2>
-          <p className="section-intro section-intro--centered">
-            Kenisar is building a more thoughtful platform for students who need real-world experience, not a crowded
-            job board pretending everyone already has it figured out.
-          </p>
+              <div className="card-grid card-grid--three card-grid--home-premium">
+                {whatCards.map((card, index) => (
+                  <PremiumCard
+                    key={card.title}
+                    title={card.title}
+                    description={card.description}
+                    icon={card.icon}
+                    variant="dark"
+                    revealDelay={`${140 + index * 110}ms`}
+                  />
+                ))}
+              </div>
+            </div>
+          </section>
 
-          <div className="card-grid card-grid--three card-grid--home-premium">
-            {whatCards.map((card, index) => (
-              <PremiumCard
-                key={card.title}
-                title={card.title}
-                description={card.description}
-                icon={card.icon}
-                variant="dark"
-                revealDelay={`${140 + index * 110}ms`}
-              />
-            ))}
-          </div>
-        </div>
-      </section>
+          <section className="section section--home-audience" id="who-its-for">
+            <div className="home-stage home-stage--light" data-reveal="section" style={{ '--reveal-delay': '60ms' }}>
+              <SectionLabel centered>Who it&apos;s for</SectionLabel>
+              <h2 className="section-heading section-heading--centered">Designed for students at different starting points.</h2>
+              <p className="section-intro section-intro--centered">
+                The platform is built to be useful before students feel fully qualified, whether they are exploring their
+                first path or looking for more direction.
+              </p>
 
-      <section className="section section--home-audience" id="who-its-for">
-        <div className="home-stage home-stage--light" data-reveal="section" style={{ '--reveal-delay': '60ms' }}>
-          <SectionLabel centered>Who it&apos;s for</SectionLabel>
-          <h2 className="section-heading section-heading--centered">Designed for students at different starting points.</h2>
-          <p className="section-intro section-intro--centered">
-            The platform is built to be useful before students feel fully qualified, whether they are exploring their
-            first path or looking for more direction.
-          </p>
+              <div className="card-grid card-grid--three card-grid--home-premium">
+                {whoCards.map((card, index) => (
+                  <PremiumCard
+                    key={card.title}
+                    title={card.title}
+                    description={card.description}
+                    note={card.note}
+                    icon={card.icon}
+                    variant="light"
+                    revealDelay={`${140 + index * 110}ms`}
+                  />
+                ))}
+              </div>
+            </div>
+          </section>
 
-          <div className="card-grid card-grid--three card-grid--home-premium">
-            {whoCards.map((card, index) => (
-              <PremiumCard
-                key={card.title}
-                title={card.title}
-                description={card.description}
-                note={card.note}
-                icon={card.icon}
-                variant="light"
-                revealDelay={`${140 + index * 110}ms`}
-              />
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <PathwaySection />
+          <PathwaySection />
+        </>
+      )}
 
       <HomeClosing onNavigate={onNavigate} currentPath={currentPath} role={role} user={user} />
     </div>

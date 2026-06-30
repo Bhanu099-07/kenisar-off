@@ -3,25 +3,37 @@ import { SiteFooter } from './SiteFooter'
 import { SiteHeader } from './SiteHeader'
 
 export function AppShell({ currentPath, onNavigate, children }) {
+  const isStudentArea =
+    currentPath === '/students' ||
+    currentPath === '/apply' ||
+    currentPath === '/auth/student' ||
+    currentPath === '/dashboard/student' ||
+    currentPath === '/profile/student' ||
+    currentPath === '/saved' ||
+    currentPath === '/applications'
+
+  const isOpportunityArea =
+    currentPath === '/opportunities' ||
+    currentPath.startsWith('/opportunities/') ||
+    currentPath === '/admin' ||
+    currentPath === '/dashboard/admin'
+
+  const isOrganizationArea =
+    currentPath === '/partners' ||
+    currentPath === '/auth/organization' ||
+    currentPath === '/dashboard/organization' ||
+    currentPath === '/profile/organization' ||
+    currentPath.startsWith('/organizations/') ||
+    currentPath === '/opportunities/new'
+
   const themeKey =
     currentPath === '/'
       ? 'home'
-      : currentPath === '/students' ||
-          currentPath === '/apply' ||
-          currentPath === '/auth/student' ||
-          currentPath === '/dashboard/student' ||
-          currentPath === '/profile/student'
+      : isStudentArea
         ? 'students'
-        : currentPath === '/opportunities' ||
-            currentPath === '/opportunities/manage' ||
-            currentPath === '/admin' ||
-            currentPath === '/dashboard/admin'
+        : isOpportunityArea
           ? 'opportunities'
-          : currentPath === '/partners' ||
-              currentPath === '/auth/organization' ||
-              currentPath === '/dashboard/organization' ||
-              currentPath === '/profile/organization' ||
-              currentPath === '/opportunities/new'
+          : isOrganizationArea
             ? 'partners'
             : 'about'
 

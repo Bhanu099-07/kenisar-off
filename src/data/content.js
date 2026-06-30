@@ -21,6 +21,8 @@ export const routes = {
   '/dashboard/student': 'dashboardStudent',
   '/profile/organization': 'profileOrganization',
   '/profile/student': 'profileStudent',
+  '/saved': 'savedOpportunities',
+  '/applications': 'studentApplications',
 }
 
 export const navigation = [
@@ -41,7 +43,7 @@ export const titleMap = {
   opportunityNew: 'Create Opportunity Listing | Kenisar',
   admin: 'Admin | Kenisar',
   dashboardAdmin: 'Admin Dashboard | Kenisar',
-  partners: 'Partners | Kenisar',
+  partners: 'For Organizations | Kenisar',
   about: 'About | Kenisar',
   privacy: 'Privacy Policy | Kenisar',
   terms: 'Terms of Service | Kenisar',
@@ -54,6 +56,11 @@ export const titleMap = {
   dashboardStudent: 'Student Dashboard | Kenisar',
   profileOrganization: 'Organization Profile | Kenisar',
   profileStudent: 'Student Profile | Kenisar',
+  opportunityDetail: 'Opportunity Details | Kenisar',
+  opportunityApplicants: 'Applicants | Kenisar',
+  organizationPublic: 'Organization | Kenisar',
+  savedOpportunities: 'Saved Opportunities | Kenisar',
+  studentApplications: 'Applications | Kenisar',
 }
 
 export const footerPolicyLinks = [

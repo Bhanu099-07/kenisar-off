@@ -4,6 +4,29 @@ import { resolveRoleFromEmail } from '../config/admin'
 export const SUPABASE_CONFIG_ERROR =
   'Kenisar is not connected yet. Add VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY to enable accounts and dashboards.'
 
+const organizationProfileFields =
+  'user_id, organization_name, contact_name, email, website, organization_type, city, description'
+
+const opportunityPublicFields = `
+  id,
+  title,
+  description,
+  opportunity_type,
+  location,
+  remote_or_in_person,
+  commitment,
+  eligibility,
+  skills_gained,
+  deadline,
+  application_link,
+  contact_email,
+  status,
+  organization_id,
+  created_at,
+  updated_at,
+  organization_profiles(${organizationProfileFields})
+`
+
 function ensureSupabase() {
   if (!supabase) {
     throw new Error(SUPABASE_CONFIG_ERROR)
@@ -301,14 +324,52 @@ export async function getApprovedOpportunities() {
 
   const { data, error } = await supabase
     .from('opportunities')
-    .select(
-      'id, title, description, opportunity_type, location, remote_or_in_person, commitment, eligibility, skills_gained, deadline, application_link, contact_email, status, organization_id',
-    )
+    .select(opportunityPublicFields)
     .eq('status', 'approved')
     .order('created_at', { ascending: false })
 
   handleError(error, 'Unable to load approved opportunities.')
   return data ?? []
+}
+
+export async function getApprovedOpportunityById(opportunityId) {
+  ensureSupabase()
+
+  const { data, error } = await supabase
+    .from('opportunities')
+    .select(opportunityPublicFields)
+    .eq('id', opportunityId)
+    .eq('status', 'approved')
+    .maybeSingle()
+
+  handleError(error, 'Unable to load this opportunity.')
+  return data
+}
+
+export async function getPublicOrganizationProfileById(organizationId) {
+  ensureSupabase()
+
+  const [profileResult, opportunitiesResult] = await Promise.all([
+    supabase
+      .from('organization_profiles')
+      .select(organizationProfileFields)
+      .eq('user_id', organizationId)
+      .maybeSingle(),
+    supabase
+      .from('opportunities')
+      .select(opportunityPublicFields)
+      .eq('organization_id', organizationId)
+      .eq('status', 'approved')
+      .order('created_at', { ascending: false }),
+  ])
+
+  handleError(profileResult.error, 'Unable to load this organization.')
+  handleError(opportunitiesResult.error, 'Unable to load opportunities for this organization.')
+
+  return {
+    opportunities: opportunitiesResult.data ?? [],
+    profile: profileResult.data,
+  }
 }
 
 export async function getAdminReviewOpportunities() {
@@ -360,7 +421,14 @@ export async function getStudentSavedOpportunities(userId) {
   const { data, error } = await supabase
     .from('saved_opportunities')
     .select(
-      'id, opportunity_id, created_at, opportunities(id, title, description, opportunity_type, location, remote_or_in_person, commitment, deadline, status)',
+      `
+        id,
+        opportunity_id,
+        created_at,
+        opportunities(
+          ${opportunityPublicFields}
+        )
+      `,
     )
     .eq('student_user_id', userId)
     .order('created_at', { ascending: false })
@@ -375,7 +443,17 @@ export async function getStudentApplications(userId) {
   const { data, error } = await supabase
     .from('opportunity_applications')
     .select(
-      'id, opportunity_id, action_type, created_at, opportunities(id, title, description, opportunity_type, location, remote_or_in_person, commitment, deadline, status)',
+      `
+        id,
+        opportunity_id,
+        action_type,
+        status,
+        created_at,
+        updated_at,
+        opportunities(
+          ${opportunityPublicFields}
+        )
+      `,
     )
     .eq('student_user_id', userId)
     .order('created_at', { ascending: false })
@@ -418,20 +496,93 @@ export async function removeSavedOpportunity(userId, opportunityId) {
 export async function recordOpportunityAction(userId, opportunityId, actionType) {
   ensureSupabase()
 
+  const existingResult = await supabase
+    .from('opportunity_applications')
+    .select('id, opportunity_id, action_type, status, created_at, updated_at')
+    .eq('student_user_id', userId)
+    .eq('opportunity_id', opportunityId)
+    .maybeSingle()
+
+  handleError(existingResult.error, 'Unable to check your opportunity activity.')
+
+  if (existingResult.data) {
+    return {
+      ...existingResult.data,
+      duplicate: true,
+    }
+  }
+
   const { data, error } = await supabase
     .from('opportunity_applications')
-    .upsert(
-      {
-        action_type: actionType,
-        opportunity_id: opportunityId,
-        student_user_id: userId,
-      },
-      { onConflict: 'student_user_id,opportunity_id' },
-    )
+    .insert({
+      action_type: actionType,
+      opportunity_id: opportunityId,
+      status: 'new',
+      student_user_id: userId,
+    })
     .select('*')
     .single()
 
   handleError(error, 'Unable to update your opportunity activity.')
+  return data
+}
+
+export async function getOrganizationOpportunityApplicants(opportunityId) {
+  ensureSupabase()
+
+  const { data, error } = await supabase
+    .from('opportunity_applications')
+    .select(
+      `
+        id,
+        opportunity_id,
+        action_type,
+        status,
+        created_at,
+        updated_at,
+        opportunities(
+          id,
+          title,
+          organization_id,
+          status
+        ),
+        student_profiles(
+          user_id,
+          full_name,
+          email,
+          school,
+          grade_or_year,
+          city,
+          interests,
+          skills,
+          experience_goals,
+          availability,
+          resume_link
+        )
+      `,
+    )
+    .eq('opportunity_id', opportunityId)
+    .order('created_at', { ascending: false })
+
+  handleError(error, 'Unable to load applicants for this opportunity.')
+  return data ?? []
+}
+
+export async function updateOpportunityApplicationStatus(applicationId, status) {
+  ensureSupabase()
+
+  if (!['new', 'reviewed', 'accepted', 'rejected'].includes(status)) {
+    throw new Error('Invalid application status.')
+  }
+
+  const { data, error } = await supabase
+    .from('opportunity_applications')
+    .update({ status })
+    .eq('id', applicationId)
+    .select('id, status')
+    .single()
+
+  handleError(error, 'Unable to update this applicant status.')
   return data
 }
 

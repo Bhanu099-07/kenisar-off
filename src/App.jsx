@@ -1,4 +1,4 @@
-import { startTransition, useEffect, useState } from 'react'
+import { startTransition, useEffect, useMemo, useState } from 'react'
 import { flushSync } from 'react-dom'
 import { AuthProvider } from './components/auth/AuthProvider'
 import { useAuth } from './components/auth/useAuth'
@@ -8,22 +8,56 @@ import { routes, titleMap } from './data/content'
 import { AdminPage } from './pages/AdminPage'
 import { AboutPage } from './pages/AboutPage'
 import { ApplyPage } from './pages/ApplyPage'
+import { ApplicationsPage } from './pages/ApplicationsPage'
 import { AuthPage } from './pages/AuthPage'
 import { DashboardPage } from './pages/DashboardPage'
 import { HomePage } from './pages/HomePage'
 import { OpportunityEditorPage } from './pages/OpportunityEditorPage'
+import { OpportunityApplicantsPage } from './pages/OpportunityApplicantsPage'
+import { OpportunityDetailPage } from './pages/OpportunityDetailPage'
 import { OpportunityManagePage } from './pages/OpportunityManagePage'
 import { OpportunitiesPage } from './pages/OpportunitiesPage'
+import { OrganizationPublicPage } from './pages/OrganizationPublicPage'
 import { PartnersPage } from './pages/PartnersPage'
 import { PolicyPage } from './pages/PolicyPage'
 import { ProfilePage } from './pages/ProfilePage'
+import { SavedOpportunitiesPage } from './pages/SavedOpportunitiesPage'
 import { StudentsPage } from './pages/StudentsPage'
 import { policyPages } from './data/policies'
 import './App.css'
 
-function getRouteKey(pathname) {
+function getRouteMatch(pathname) {
   const path = pathname.split('#')[0].split('?')[0]
-  return routes[path] ?? 'home'
+
+  if (routes[path]) {
+    return { routeKey: routes[path], routeParams: {} }
+  }
+
+  const applicantsMatch = path.match(/^\/opportunities\/([^/]+)\/applicants$/)
+  if (applicantsMatch) {
+    return {
+      routeKey: 'opportunityApplicants',
+      routeParams: { opportunityId: applicantsMatch[1] },
+    }
+  }
+
+  const opportunityMatch = path.match(/^\/opportunities\/([^/]+)$/)
+  if (opportunityMatch) {
+    return {
+      routeKey: 'opportunityDetail',
+      routeParams: { opportunityId: opportunityMatch[1] },
+    }
+  }
+
+  const organizationMatch = path.match(/^\/organizations\/([^/]+)$/)
+  if (organizationMatch) {
+    return {
+      routeKey: 'organizationPublic',
+      routeParams: { organizationId: organizationMatch[1] },
+    }
+  }
+
+  return { routeKey: 'home', routeParams: {} }
 }
 
 function getPathname(path) {
@@ -51,23 +85,28 @@ function applyRouteTransition(update) {
   })
 }
 
-function ProtectedPage({ children, onNavigate, role }) {
+function ProtectedPage({ children, onNavigate, role, allowedRoles }) {
   const { loading, role: currentRole, user } = useAuth()
+  const resolvedAllowedRoles = useMemo(() => allowedRoles ?? (role ? [role] : []), [allowedRoles, role])
 
   useEffect(() => {
     if (loading) return
 
     if (!user) {
-      onNavigate(role === 'organization' ? '/auth?role=organization' : '/auth?role=student')
+      if (resolvedAllowedRoles.length === 1 && resolvedAllowedRoles[0] === 'organization') {
+        onNavigate('/auth?role=organization')
+      } else {
+        onNavigate('/auth')
+      }
       return
     }
 
-    if (currentRole && currentRole !== role) {
+    if (resolvedAllowedRoles.length > 0 && currentRole && !resolvedAllowedRoles.includes(currentRole)) {
       onNavigate(getDashboardPathForRole(currentRole))
     }
-  }, [currentRole, loading, onNavigate, role, user])
+  }, [currentRole, loading, onNavigate, resolvedAllowedRoles, user])
 
-  if (loading || !user || (currentRole && currentRole !== role)) {
+  if (loading || !user || (resolvedAllowedRoles.length > 0 && currentRole && !resolvedAllowedRoles.includes(currentRole))) {
     return (
       <div className="page">
         <section className="section section--narrow">
@@ -136,7 +175,7 @@ function ProtectedAdminPage({ children, onNavigate, currentPath }) {
   return children
 }
 
-function PageContent({ routeKey, onNavigate, currentPath }) {
+function PageContent({ routeKey, routeParams, onNavigate, currentPath }) {
   switch (routeKey) {
     case 'auth':
       return <AuthPage onNavigate={onNavigate} currentPath={currentPath} />
@@ -150,6 +189,22 @@ function PageContent({ routeKey, onNavigate, currentPath }) {
       return <ApplyPage onNavigate={onNavigate} currentPath={currentPath} />
     case 'opportunities':
       return <OpportunitiesPage onNavigate={onNavigate} currentPath={currentPath} />
+    case 'opportunityDetail':
+      return (
+        <OpportunityDetailPage
+          onNavigate={onNavigate}
+          currentPath={currentPath}
+          opportunityId={routeParams.opportunityId}
+        />
+      )
+    case 'organizationPublic':
+      return (
+        <OrganizationPublicPage
+          onNavigate={onNavigate}
+          currentPath={currentPath}
+          organizationId={routeParams.organizationId}
+        />
+      )
     case 'opportunityNew':
       return (
         <ProtectedPage role="organization" onNavigate={onNavigate} currentPath={currentPath}>
@@ -189,10 +244,32 @@ function PageContent({ routeKey, onNavigate, currentPath }) {
           <DashboardPage role="student" onNavigate={onNavigate} currentPath={currentPath} />
         </ProtectedPage>
       )
+    case 'savedOpportunities':
+      return (
+        <ProtectedPage role="student" onNavigate={onNavigate} currentPath={currentPath}>
+          <SavedOpportunitiesPage onNavigate={onNavigate} currentPath={currentPath} />
+        </ProtectedPage>
+      )
+    case 'studentApplications':
+      return (
+        <ProtectedPage role="student" onNavigate={onNavigate} currentPath={currentPath}>
+          <ApplicationsPage onNavigate={onNavigate} currentPath={currentPath} />
+        </ProtectedPage>
+      )
     case 'dashboardOrganization':
       return (
         <ProtectedPage role="organization" onNavigate={onNavigate} currentPath={currentPath}>
           <DashboardPage role="organization" onNavigate={onNavigate} currentPath={currentPath} />
+        </ProtectedPage>
+      )
+    case 'opportunityApplicants':
+      return (
+        <ProtectedPage allowedRoles={['organization', 'admin']} onNavigate={onNavigate} currentPath={currentPath}>
+          <OpportunityApplicantsPage
+            onNavigate={onNavigate}
+            currentPath={currentPath}
+            opportunityId={routeParams.opportunityId}
+          />
         </ProtectedPage>
       )
     case 'profileStudent':
@@ -227,13 +304,14 @@ function App() {
   }, [])
 
   const currentPath = getPathname(currentRoute)
-  const routeKey = getRouteKey(currentPath)
+  const routeMatch = getRouteMatch(currentPath)
+  const { routeKey, routeParams } = routeMatch
 
   useEffect(() => {
-    document.title = titleMap[getRouteKey(currentPath)] ?? titleMap.home
+    document.title = titleMap[routeKey] ?? titleMap.home
     const hash = window.location.hash.slice(1)
     if (hash) scrollToHash(hash)
-  }, [currentPath])
+  }, [currentPath, routeKey])
 
   function navigate(nextPath) {
     const pathname = getPathname(nextPath)
@@ -259,7 +337,13 @@ function App() {
   return (
     <AuthProvider>
       <AppShell currentPath={currentPath} onNavigate={navigate}>
-        <PageContent key={currentRoute} routeKey={routeKey} onNavigate={navigate} currentPath={currentPath} />
+        <PageContent
+          key={currentRoute}
+          routeKey={routeKey}
+          routeParams={routeParams}
+          onNavigate={navigate}
+          currentPath={currentPath}
+        />
       </AppShell>
     </AuthProvider>
   )
