@@ -1,4 +1,5 @@
 import { supabase } from './supabaseClient'
+import { resolveRoleFromEmail } from '../config/admin'
 
 export const SUPABASE_CONFIG_ERROR =
   'Kenisar is not connected yet. Add VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY to enable accounts and dashboards.'
@@ -54,7 +55,7 @@ function buildOrganizationProfilePayload(userId, values = {}) {
 }
 
 function getUserRole(user, fallbackRole) {
-  return fallbackRole ?? user?.user_metadata?.role ?? null
+  return resolveRoleFromEmail(user?.email, user?.user_metadata?.role ?? fallbackRole ?? null)
 }
 
 export async function upsertUserProfile(userId, role) {
@@ -79,7 +80,12 @@ export async function upsertUserProfile(userId, role) {
 export async function ensureStudentProfileExists(user) {
   ensureSupabase()
 
-  await upsertUserProfile(user.id, getUserRole(user, 'student'))
+  const role = getUserRole(user, 'student')
+  await upsertUserProfile(user.id, role)
+
+  if (role === 'admin') {
+    return null
+  }
 
   const payload = buildStudentProfilePayload(user.id, {
     email: user.email,
@@ -98,7 +104,12 @@ export async function ensureStudentProfileExists(user) {
 export async function ensureOrganizationProfileExists(user) {
   ensureSupabase()
 
-  await upsertUserProfile(user.id, getUserRole(user, 'organization'))
+  const role = getUserRole(user, 'organization')
+  await upsertUserProfile(user.id, role)
+
+  if (role === 'admin') {
+    return null
+  }
 
   const payload = buildOrganizationProfilePayload(user.id, {
     contact_name: user.user_metadata?.contact_name,
@@ -118,7 +129,13 @@ export async function ensureOrganizationProfileExists(user) {
 export async function provisionStudentAccountProfile(user, values = {}) {
   ensureSupabase()
 
-  await upsertUserProfile(user.id, getUserRole(user, 'student'))
+  const role = getUserRole(user, 'student')
+  await upsertUserProfile(user.id, role)
+
+  if (role === 'admin') {
+    return null
+  }
+
   return upsertStudentProfile(user.id, {
     email: user.email,
     full_name: user.user_metadata?.full_name,
@@ -129,7 +146,13 @@ export async function provisionStudentAccountProfile(user, values = {}) {
 export async function provisionOrganizationAccountProfile(user, values = {}) {
   ensureSupabase()
 
-  await upsertUserProfile(user.id, getUserRole(user, 'organization'))
+  const role = getUserRole(user, 'organization')
+  await upsertUserProfile(user.id, role)
+
+  if (role === 'admin') {
+    return null
+  }
+
   return upsertOrganizationProfile(user.id, {
     contact_name: user.user_metadata?.contact_name,
     email: user.email,
@@ -141,13 +164,15 @@ export async function provisionOrganizationAccountProfile(user, values = {}) {
 export async function signUpStudent({ email, fullName, password }) {
   ensureSupabase()
 
+  const assignedRole = resolveRoleFromEmail(email, 'student')
+
   const { data, error } = await supabase.auth.signUp({
     email,
     password,
     options: {
       data: {
         full_name: fullName,
-        role: 'student',
+        role: assignedRole,
       },
     },
   })
@@ -168,11 +193,16 @@ export async function signUpStudent({ email, fullName, password }) {
     }
   }
 
-  return data
+  return {
+    ...data,
+    assignedRole,
+  }
 }
 
 export async function signUpOrganization({ contactName, email, organizationName, password }) {
   ensureSupabase()
+
+  const assignedRole = resolveRoleFromEmail(email, 'organization')
 
   const { data, error } = await supabase.auth.signUp({
     email,
@@ -181,7 +211,7 @@ export async function signUpOrganization({ contactName, email, organizationName,
       data: {
         contact_name: contactName,
         organization_name: organizationName,
-        role: 'organization',
+        role: assignedRole,
       },
     },
   })
@@ -203,7 +233,10 @@ export async function signUpOrganization({ contactName, email, organizationName,
     }
   }
 
-  return data
+  return {
+    ...data,
+    assignedRole,
+  }
 }
 
 export async function signInWithPassword({ email, password }) {
@@ -215,7 +248,10 @@ export async function signInWithPassword({ email, password }) {
   })
 
   handleError(error, 'Unable to sign in.')
-  return data
+  return {
+    ...data,
+    resolvedRole: resolveRoleFromEmail(data.user?.email, data.user?.user_metadata?.role ?? null),
+  }
 }
 
 export async function getStudentProfile(userId) {

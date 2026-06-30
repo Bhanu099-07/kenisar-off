@@ -4,6 +4,7 @@ import { FormStatus } from '../components/ui/FormStatus'
 import { PageHero } from '../components/ui/PageHero'
 import { SectionLabel } from '../components/ui/SectionLabel'
 import { useAuth } from '../components/auth/useAuth'
+import { getDashboardPathForRole } from '../config/admin'
 import { emailField, required } from '../forms/formValidation'
 import {
   signInWithPassword,
@@ -66,7 +67,7 @@ export function AuthPage({ currentPath, onNavigate, role }) {
     if (loading || !user) return
 
     const targetRole = currentRole ?? role
-    onNavigate(targetRole === 'organization' ? '/dashboard/organization' : '/dashboard/student')
+    onNavigate(getDashboardPathForRole(targetRole))
   }, [currentRole, loading, onNavigate, role, user])
 
   function updateField(name, value) {
@@ -131,13 +132,12 @@ export function AuthPage({ currentPath, onNavigate, role }) {
 
     try {
       if (mode === 'login') {
-        const { user: nextUser } = await signInWithPassword({
+        const { resolvedRole } = await signInWithPassword({
           email: values.email.trim(),
           password: values.password,
         })
 
-        const nextRole = nextUser?.user_metadata?.role ?? role
-        onNavigate(nextRole === 'organization' ? '/dashboard/organization' : '/dashboard/student')
+        onNavigate(getDashboardPathForRole(resolvedRole ?? role))
         return
       }
 
@@ -156,7 +156,7 @@ export function AuthPage({ currentPath, onNavigate, role }) {
             })
 
       if (result.session) {
-        onNavigate(authConfig.profilePath)
+        onNavigate(result.assignedRole === 'admin' ? '/dashboard/admin' : authConfig.profilePath)
         return
       }
 

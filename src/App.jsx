@@ -3,7 +3,7 @@ import { flushSync } from 'react-dom'
 import { AuthProvider } from './components/auth/AuthProvider'
 import { useAuth } from './components/auth/useAuth'
 import { AppShell } from './components/layout/AppShell'
-import { isAdminUser } from './config/admin'
+import { getDashboardPathForRole, isAdminUser } from './config/admin'
 import { routes, titleMap } from './data/content'
 import { AdminPage } from './pages/AdminPage'
 import { AboutPage } from './pages/AboutPage'
@@ -63,7 +63,7 @@ function ProtectedPage({ children, onNavigate, role }) {
     }
 
     if (currentRole && currentRole !== role) {
-      onNavigate(currentRole === 'organization' ? '/dashboard/organization' : '/dashboard/student')
+      onNavigate(getDashboardPathForRole(currentRole))
     }
   }, [currentRole, loading, onNavigate, role, user])
 
@@ -85,6 +85,7 @@ function ProtectedPage({ children, onNavigate, role }) {
 
 function ProtectedAdminPage({ children, onNavigate, currentPath }) {
   const { loading, role, user } = useAuth()
+  const hasAdminAccess = role === 'admin' || isAdminUser(user)
 
   useEffect(() => {
     if (loading) return
@@ -94,22 +95,12 @@ function ProtectedAdminPage({ children, onNavigate, currentPath }) {
       return
     }
 
-    if (!isAdminUser(user)) {
-      if (role === 'organization') {
-        onNavigate('/dashboard/organization')
-        return
-      }
-
-      if (role === 'student') {
-        onNavigate('/dashboard/student')
-        return
-      }
-
-      onNavigate('/')
+    if (!hasAdminAccess) {
+      onNavigate(role ? getDashboardPathForRole(role) : '/')
     }
-  }, [loading, onNavigate, role, user])
+  }, [hasAdminAccess, loading, onNavigate, role, user])
 
-  if (loading || !user || !isAdminUser(user)) {
+  if (loading || !user || !hasAdminAccess) {
     return (
       <div className="page">
         <section className="section section--narrow">
@@ -153,6 +144,7 @@ function PageContent({ routeKey, onNavigate, currentPath }) {
         </ProtectedPage>
       )
     case 'admin':
+    case 'dashboardAdmin':
       return (
         <ProtectedAdminPage onNavigate={onNavigate} currentPath={currentPath}>
           <AdminPage onNavigate={onNavigate} currentPath={currentPath} />

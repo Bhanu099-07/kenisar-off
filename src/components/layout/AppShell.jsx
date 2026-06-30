@@ -12,7 +12,10 @@ export function AppShell({ currentPath, onNavigate, children }) {
           currentPath === '/dashboard/student' ||
           currentPath === '/profile/student'
         ? 'students'
-        : currentPath === '/opportunities' || currentPath === '/opportunities/manage' || currentPath === '/admin'
+        : currentPath === '/opportunities' ||
+            currentPath === '/opportunities/manage' ||
+            currentPath === '/admin' ||
+            currentPath === '/dashboard/admin'
           ? 'opportunities'
           : currentPath === '/partners' ||
               currentPath === '/auth/organization' ||

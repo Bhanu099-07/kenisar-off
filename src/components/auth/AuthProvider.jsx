@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react'
 import { AuthContext } from './AuthContext'
 import { upsertUserProfile } from '../../lib/kenisarApi'
+import { resolveRoleFromEmail } from '../../config/admin'
 import { isSupabaseConfigured, supabase } from '../../lib/supabaseClient'
 
-function getRoleFromUser(user) {
-  return user?.user_metadata?.role ?? null
+function getRoleFromUser(user, fallbackRole = null) {
+  return resolveRoleFromEmail(user?.email, user?.user_metadata?.role ?? fallbackRole ?? null)
 }
 
 export function AuthProvider({ children }) {
@@ -133,7 +134,7 @@ export function AuthProvider({ children }) {
     loading,
     profile,
     refreshProfile,
-    role: profile?.role ?? getRoleFromUser(session?.user),
+    role: getRoleFromUser(session?.user, profile?.role),
     session,
     signOut,
     user: session?.user ?? null,

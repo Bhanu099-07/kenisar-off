@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useAuth } from '../components/auth/useAuth'
+import { getDashboardPathForRole } from '../config/admin'
 import { Button } from '../components/ui/Button'
 import { PageHero } from '../components/ui/PageHero'
 import { SectionLabel } from '../components/ui/SectionLabel'
@@ -65,11 +66,11 @@ function OpportunityCard({
       ) : (
         <div className="button-row">
           <Button
-            href={role === 'organization' ? '/dashboard/organization' : '/auth/student'}
+            href={user ? getDashboardPathForRole(role) : '/auth/student'}
             onNavigate={onNavigate}
             currentPath={currentPath}
           >
-            {role === 'organization' ? 'Go to dashboard' : 'Create student profile'}
+            {user ? 'Go to dashboard' : 'Create student profile'}
           </Button>
         </div>
       )}
@@ -227,14 +228,14 @@ export function OpportunitiesPage({ onNavigate, currentPath }) {
 
           <aside className="content-card content-card--light content-card--support" data-reveal="card" data-tilt>
             <SectionLabel>Quick actions</SectionLabel>
-            <h2>{user && role === 'student' ? 'Keep moving inside your account.' : 'Create an account to take action.'}</h2>
+            <h2>{user ? 'Keep moving inside your account.' : 'Create an account to take action.'}</h2>
             <div className="button-row">
               <Button
-                href={user && role === 'student' ? '/dashboard/student' : '/auth/student'}
+                href={user ? getDashboardPathForRole(role) : '/auth/student'}
                 onNavigate={onNavigate}
                 currentPath={currentPath}
               >
-                {user && role === 'student' ? 'Student dashboard' : 'Create student profile'}
+                {user ? 'Dashboard' : 'Create student profile'}
               </Button>
               <Button href="/auth/organization" onNavigate={onNavigate} currentPath={currentPath} variant="accent">
                 Create organization account
