@@ -8,8 +8,8 @@ export function ApplyPage({ onNavigate, currentPath }) {
     <div className="page">
       <PageHero
         label="Student Profile"
-        title="Legacy student waitlist form."
-        description="Kenisar now supports real student accounts. This original interest form is still available if you want to leave your details separately."
+        title="Student interest form."
+        description="Kenisar now supports real student accounts. This separate interest form remains available if you want to share details outside the account flow."
         theme="students"
       />
 

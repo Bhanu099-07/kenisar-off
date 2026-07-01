@@ -32,6 +32,7 @@ export function OpportunityDetailPage({ currentPath, onNavigate, opportunityId }
   const [opportunity, setOpportunity] = useState(null)
   const [status, setStatus] = useState('loading')
   const [message, setMessage] = useState('')
+  const [messageTone, setMessageTone] = useState('idle')
   const [saved, setSaved] = useState(false)
   const [application, setApplication] = useState(null)
 
@@ -41,6 +42,7 @@ export function OpportunityDetailPage({ currentPath, onNavigate, opportunityId }
     async function load() {
       setStatus('loading')
       setMessage('')
+      setMessageTone('idle')
 
       try {
         const opportunityResult = await getApprovedOpportunityById(opportunityId)
@@ -107,13 +109,16 @@ export function OpportunityDetailPage({ currentPath, onNavigate, opportunityId }
         await removeSavedOpportunity(user.id, opportunityId)
         setSaved(false)
         setMessage('Removed from saved opportunities.')
+        setMessageTone('success')
       } else {
         await saveOpportunity(user.id, opportunityId)
         setSaved(true)
         setMessage('Saved to your opportunity list.')
+        setMessageTone('success')
       }
     } catch (error) {
       setMessage(error.message || 'Unable to update this saved opportunity.')
+      setMessageTone('error')
     }
   }
 
@@ -129,6 +134,7 @@ export function OpportunityDetailPage({ currentPath, onNavigate, opportunityId }
           ? 'You already applied to this opportunity.'
           : 'You already recorded interest in this opportunity.',
       )
+      setMessageTone('success')
       return
     }
 
@@ -147,12 +153,14 @@ export function OpportunityDetailPage({ currentPath, onNavigate, opportunityId }
             ? 'Application recorded. The external application link opened in a new tab.'
             : 'Your interest was recorded successfully.',
       )
+      setMessageTone('success')
 
       if (opportunity?.application_link) {
         window.open(opportunity.application_link, '_blank', 'noopener,noreferrer')
       }
     } catch (error) {
       setMessage(error.message || 'Unable to record your application activity.')
+      setMessageTone('error')
     }
   }
 
@@ -273,7 +281,7 @@ export function OpportunityDetailPage({ currentPath, onNavigate, opportunityId }
             </p>
 
             {message ? (
-              <div className="form-status form-status--success" role="status">
+              <div className={`form-status ${messageTone === 'error' ? 'form-status--error' : 'form-status--success'}`} role={messageTone === 'error' ? 'alert' : 'status'}>
                 <p>{message}</p>
               </div>
             ) : null}

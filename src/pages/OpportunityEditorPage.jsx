@@ -4,7 +4,7 @@ import { Button } from '../components/ui/Button'
 import { FormStatus } from '../components/ui/FormStatus'
 import { PageHero } from '../components/ui/PageHero'
 import { StatusBadge } from '../components/ui/StatusBadge'
-import { ensureOrganizationProfileExists, getOpportunityById, upsertOpportunity } from '../lib/kenisarApi'
+import { deleteOpportunity, ensureOrganizationProfileExists, getOpportunityById, upsertOpportunity } from '../lib/kenisarApi'
 import { emailField, required } from '../forms/formValidation'
 
 function getOpportunitySearchId() {
@@ -33,6 +33,7 @@ export function OpportunityEditorPage({ currentPath, onNavigate }) {
   const [submitStatus, setSubmitStatus] = useState('idle')
   const [message, setMessage] = useState('')
   const [errors, setErrors] = useState({})
+  const [isDeleting, setIsDeleting] = useState(false)
   const editingId = useMemo(() => getOpportunitySearchId(), [])
 
   useEffect(() => {
@@ -51,6 +52,12 @@ export function OpportunityEditorPage({ currentPath, onNavigate }) {
         if (!isMounted) return
 
         setOrganizationProfile(profile)
+
+        if (editingId && (!existing || existing.organization_id !== user.id)) {
+          setPageStatus('error')
+          setMessage('This listing could not be found in your organization account.')
+          return
+        }
 
         if (existing) {
           setValues({
@@ -151,7 +158,31 @@ export function OpportunityEditorPage({ currentPath, onNavigate }) {
 
   async function handleSubmit(event) {
     event.preventDefault()
-    await saveWithStatus(values.status === 'pending' ? 'pending' : 'draft')
+    await saveWithStatus('draft')
+  }
+
+  async function handleDelete() {
+    if (!editingId) return
+
+    const confirmed = window.confirm(
+      `Delete "${values.title || 'this opportunity'}"? This will also remove any saved records and applications tied to it.`,
+    )
+
+    if (!confirmed) return
+
+    setIsDeleting(true)
+    setSubmitStatus('idle')
+    setMessage('')
+
+    try {
+      await deleteOpportunity(user.id, editingId)
+      onNavigate('/opportunities/manage')
+    } catch (error) {
+      setSubmitStatus('error')
+      setMessage(error.message || 'Unable to delete this listing.')
+    } finally {
+      setIsDeleting(false)
+    }
   }
 
   if (pageStatus === 'loading') {
@@ -289,20 +320,25 @@ export function OpportunityEditorPage({ currentPath, onNavigate }) {
           </label>
 
           <div className="button-row">
-            <Button currentPath={currentPath} type="submit" variant="outline">
+            <Button currentPath={currentPath} type="submit" variant="outline" disabled={submitStatus === 'loading' || isDeleting}>
               Save draft
             </Button>
             <button
               type="button"
               className="button button--filled motion-magnetic"
               onClick={() => saveWithStatus('pending')}
-              disabled={submitStatus === 'loading'}
+              disabled={submitStatus === 'loading' || isDeleting}
             >
               <span>Submit for review</span>
             </button>
             <Button href="/opportunities/manage" onNavigate={onNavigate} currentPath={currentPath} variant="accent">
               Manage listings
             </Button>
+            {editingId ? (
+              <Button variant="outline" onClick={handleDelete} disabled={isDeleting || submitStatus === 'loading'}>
+                {isDeleting ? 'Deleting...' : 'Delete listing'}
+              </Button>
+            ) : null}
           </div>
         </form>
       </section>

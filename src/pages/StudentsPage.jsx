@@ -51,8 +51,8 @@ export function StudentsPage({ onNavigate, currentPath }) {
         <div className="cta-card" data-reveal="section" data-tilt>
           <div>
             <SectionLabel>Ready to start?</SectionLabel>
-            <h2>Create your profile so Kenisar can notify you when opportunities open.</h2>
-            <p>We are building with students and organizations. Opportunities are coming soon.</p>
+            <h2>Create your student profile and start exploring Kenisar.</h2>
+            <p>Build your profile now so you can browse approved opportunities, save roles, and track applications.</p>
           </div>
           <div className="button-row">
             <Button href="/auth?role=student" onNavigate={onNavigate} currentPath={currentPath}>

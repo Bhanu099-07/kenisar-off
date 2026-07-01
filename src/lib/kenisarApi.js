@@ -535,6 +535,7 @@ export async function getOrganizationOpportunityApplicants(opportunityId) {
     .select(
       `
         id,
+        student_user_id,
         opportunity_id,
         action_type,
         status,
@@ -545,19 +546,6 @@ export async function getOrganizationOpportunityApplicants(opportunityId) {
           title,
           organization_id,
           status
-        ),
-        student_profiles(
-          user_id,
-          full_name,
-          email,
-          school,
-          grade_or_year,
-          city,
-          interests,
-          skills,
-          experience_goals,
-          availability,
-          resume_link
         )
       `,
     )
@@ -565,7 +553,44 @@ export async function getOrganizationOpportunityApplicants(opportunityId) {
     .order('created_at', { ascending: false })
 
   handleError(error, 'Unable to load applicants for this opportunity.')
-  return data ?? []
+
+  const applications = data ?? []
+  const studentIds = [...new Set(applications.map((item) => item.student_user_id).filter(Boolean))]
+
+  if (studentIds.length === 0) {
+    return applications.map((item) => ({
+      ...item,
+      student_profiles: null,
+    }))
+  }
+
+  const studentProfilesResult = await supabase
+    .from('student_profiles')
+    .select(
+      `
+        user_id,
+        full_name,
+        email,
+        school,
+        grade_or_year,
+        city,
+        interests,
+        skills,
+        experience_goals,
+        availability,
+        resume_link
+      `,
+    )
+    .in('user_id', studentIds)
+
+  handleError(studentProfilesResult.error, 'Unable to load applicant profiles.')
+
+  const profileMap = new Map((studentProfilesResult.data ?? []).map((profile) => [profile.user_id, profile]))
+
+  return applications.map((item) => ({
+    ...item,
+    student_profiles: profileMap.get(item.student_user_id) ?? null,
+  }))
 }
 
 export async function updateOpportunityApplicationStatus(applicationId, status) {
@@ -605,6 +630,18 @@ export async function getOpportunityById(opportunityId) {
   const { data, error } = await supabase.from('opportunities').select('*').eq('id', opportunityId).maybeSingle()
   handleError(error, 'Unable to load this opportunity.')
   return data
+}
+
+export async function deleteOpportunity(userId, opportunityId) {
+  ensureSupabase()
+
+  const { error } = await supabase
+    .from('opportunities')
+    .delete()
+    .eq('id', opportunityId)
+    .eq('organization_id', userId)
+
+  handleError(error, 'Unable to delete this opportunity.')
 }
 
 export async function upsertOpportunity(userId, values) {

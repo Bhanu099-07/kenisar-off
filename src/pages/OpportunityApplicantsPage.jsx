@@ -20,8 +20,8 @@ function ApplicantCard({ applicant, currentPath, onNavigate, onUpdateStatus, upd
     <article className="content-card content-card--light applicant-card" data-reveal="card" data-tilt>
       <div className="dashboard-record__header">
         <div>
-          <h2>{student?.full_name?.trim() || 'Student name pending'}</h2>
-          <p>{student?.email?.trim() || 'Email not provided'}</p>
+          <h2>{student?.full_name?.trim() || 'Not provided'}</h2>
+          <p>{student?.email?.trim() || 'Not provided'}</p>
         </div>
         <div className="application-meta-row">
           <StatusBadge status={applicant.action_type} />
@@ -32,7 +32,7 @@ function ApplicantCard({ applicant, currentPath, onNavigate, onUpdateStatus, upd
       <div className="detail-grid detail-grid--two">
         <div className="detail-grid__item">
           <span>School</span>
-          <strong>{student?.school?.trim() || 'School not provided'}</strong>
+          <strong>{student?.school?.trim() || 'Not provided'}</strong>
         </div>
         <div className="detail-grid__item">
           <span>Grade or year</span>
@@ -50,16 +50,16 @@ function ApplicantCard({ applicant, currentPath, onNavigate, onUpdateStatus, upd
 
       <div className="page-stack applicant-card__details">
         <p>
-          <strong>Interests:</strong> {formatListText(student?.interests)}
+          <strong>Interests:</strong> {formatListText(student?.interests, 'Not provided')}
         </p>
         <p>
-          <strong>Skills:</strong> {formatListText(student?.skills)}
+          <strong>Skills:</strong> {formatListText(student?.skills, 'Not provided')}
         </p>
         <p>
-          <strong>Experience goals:</strong> {student?.experience_goals?.trim() || 'Not shared yet'}
+          <strong>Experience goals:</strong> {student?.experience_goals?.trim() || 'Not provided'}
         </p>
         <p>
-          <strong>Availability:</strong> {student?.availability?.trim() || 'Not shared yet'}
+          <strong>Availability:</strong> {student?.availability?.trim() || 'Not provided'}
         </p>
         {student?.resume_link ? (
           <p>
@@ -96,6 +96,7 @@ export function OpportunityApplicantsPage({ currentPath, onNavigate, opportunity
   const [applications, setApplications] = useState([])
   const [status, setStatus] = useState('loading')
   const [message, setMessage] = useState('')
+  const [messageTone, setMessageTone] = useState('idle')
   const [updatingId, setUpdatingId] = useState('')
 
   useEffect(() => {
@@ -104,6 +105,7 @@ export function OpportunityApplicantsPage({ currentPath, onNavigate, opportunity
     async function load() {
       setStatus('loading')
       setMessage('')
+      setMessageTone('idle')
 
       try {
         const [opportunityResult, applicantResults] = await Promise.all([
@@ -120,6 +122,7 @@ export function OpportunityApplicantsPage({ currentPath, onNavigate, opportunity
         if (!isMounted) return
         setStatus('error')
         setMessage(error.message || 'Unable to load applicants for this opportunity.')
+        setMessageTone('error')
       }
     }
 
@@ -136,6 +139,7 @@ export function OpportunityApplicantsPage({ currentPath, onNavigate, opportunity
   async function handleUpdateStatus(applicationId, nextStatus) {
     setUpdatingId(applicationId)
     setMessage('')
+    setMessageTone('idle')
 
     try {
       await updateOpportunityApplicationStatus(applicationId, nextStatus)
@@ -143,8 +147,10 @@ export function OpportunityApplicantsPage({ currentPath, onNavigate, opportunity
         current.map((entry) => (entry.id === applicationId ? { ...entry, status: nextStatus } : entry)),
       )
       setMessage(`Applicant status updated to ${nextStatus}.`)
+      setMessageTone('success')
     } catch (error) {
       setMessage(error.message || 'Unable to update this applicant.')
+      setMessageTone('error')
     } finally {
       setUpdatingId('')
     }
@@ -163,25 +169,16 @@ export function OpportunityApplicantsPage({ currentPath, onNavigate, opportunity
     )
   }
 
-  if (status === 'error') {
-    return (
-      <div className="page">
-        <PageHero
-          label="Applicants"
-          title="We couldn't load applicants."
-          description={message}
-          theme="partners"
-        />
-      </div>
-    )
-  }
-
   return (
     <div className="page">
       <PageHero
         label="Applicants"
         title={applicantTitle}
-        description={`Review applicants, track interest, and keep the next steps for ${applicantCount} student${applicantCount === 1 ? '' : 's'} moving.`}
+        description={
+          status === 'error'
+            ? 'Review access is available here when applicant data can be loaded.'
+            : `Review applicants, track interest, and keep the next steps for ${applicantCount} student${applicantCount === 1 ? '' : 's'} moving.`
+        }
         theme={role === 'admin' ? 'opportunities' : 'partners'}
       />
 
@@ -204,13 +201,27 @@ export function OpportunityApplicantsPage({ currentPath, onNavigate, opportunity
       <section className="section" data-reveal="section">
         <SectionLabel>Applicant queue</SectionLabel>
         {message ? (
-          <div className="form-status form-status--success" role="status">
+          <div className={`form-status ${messageTone === 'error' ? 'form-status--error' : 'form-status--success'}`} role={messageTone === 'error' ? 'alert' : 'status'}>
             <p>{message}</p>
           </div>
         ) : null}
 
         <div className="dashboard-stack">
-          {applications.length > 0 ? (
+          {status === 'error' ? (
+            <div className="empty-state-card" data-tilt>
+              <h2>Applicants could not be loaded.</h2>
+              <p>{message || 'Please try again after refreshing this page.'}</p>
+              <div className="button-row">
+                <Button
+                  href={role === 'admin' ? '/admin' : '/opportunities/manage'}
+                  onNavigate={onNavigate}
+                  currentPath={currentPath}
+                >
+                  {role === 'admin' ? 'Back to review' : 'Back to listings'}
+                </Button>
+              </div>
+            </div>
+          ) : applications.length > 0 ? (
             applications.map((application) => (
               <ApplicantCard
                 key={application.id}

@@ -4,13 +4,15 @@ import { useAuth } from '../components/auth/useAuth'
 import { Button } from '../components/ui/Button'
 import { PageHero } from '../components/ui/PageHero'
 import { SectionLabel } from '../components/ui/SectionLabel'
-import { getOrganizationOpportunities } from '../lib/kenisarApi'
+import { deleteOpportunity, getOrganizationOpportunities } from '../lib/kenisarApi'
 
 export function OpportunityManagePage({ currentPath, onNavigate }) {
   const { user } = useAuth()
   const [opportunities, setOpportunities] = useState([])
   const [status, setStatus] = useState('loading')
   const [message, setMessage] = useState('')
+  const [messageTone, setMessageTone] = useState('idle')
+  const [deletingId, setDeletingId] = useState('')
 
   useEffect(() => {
     if (!user) return
@@ -20,6 +22,7 @@ export function OpportunityManagePage({ currentPath, onNavigate }) {
     async function load() {
       setStatus('loading')
       setMessage('')
+      setMessageTone('idle')
 
       try {
         const data = await getOrganizationOpportunities(user.id)
@@ -39,6 +42,30 @@ export function OpportunityManagePage({ currentPath, onNavigate }) {
       isMounted = false
     }
   }, [user])
+
+  async function handleDelete(opportunity) {
+    const confirmed = window.confirm(
+      `Delete "${opportunity.title || 'this opportunity'}"? This will also remove its saved records and applications.`,
+    )
+
+    if (!confirmed) return
+
+    setDeletingId(opportunity.id)
+    setMessage('')
+    setMessageTone('idle')
+
+    try {
+      await deleteOpportunity(user.id, opportunity.id)
+      setOpportunities((current) => current.filter((item) => item.id !== opportunity.id))
+      setMessage('Opportunity deleted successfully.')
+      setMessageTone('success')
+    } catch (error) {
+      setMessage(error.message || 'Unable to delete this opportunity.')
+      setMessageTone('error')
+    } finally {
+      setDeletingId('')
+    }
+  }
 
   if (status === 'loading') {
     return (
@@ -83,6 +110,11 @@ export function OpportunityManagePage({ currentPath, onNavigate }) {
 
       <section className="section" data-reveal="section">
         <SectionLabel>Your listings</SectionLabel>
+        {message ? (
+          <div className={`form-status ${messageTone === 'error' ? 'form-status--error' : 'form-status--success'}`} role={messageTone === 'error' ? 'alert' : 'status'}>
+            <p>{message}</p>
+          </div>
+        ) : null}
         <div className="dashboard-stack">
           {opportunities.length > 0 ? (
             opportunities.map((opportunity) => (
@@ -109,6 +141,13 @@ export function OpportunityManagePage({ currentPath, onNavigate }) {
                   variant="accent"
                 >
                   View applicants
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => handleDelete(opportunity)}
+                  disabled={deletingId === opportunity.id}
+                >
+                  {deletingId === opportunity.id ? 'Deleting...' : 'Delete listing'}
                 </Button>
               </OpportunitySummaryCard>
             ))
